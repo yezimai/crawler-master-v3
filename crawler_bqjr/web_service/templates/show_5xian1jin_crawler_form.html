@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <title>公积金社保数据爬虫</title>
+    {% load static %}
+    <link rel="stylesheet" href="//cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+    <script type="text/javascript" src="{% static 'js/zhongwen_sort.js' %}"></script>
+</head>
+<body>
+<div class="robot-main">
+    <div class="m-dialog robot-dialog">
+        <div class="m-dialog-hd">
+            <div class="m-dialog-title">公积金社保数据查询系统</div>
+        </div>
+        <div class="m-dialog-md">
+            <div class="robot-form m-form" id="main_div">
+                <div class="m-form-item m-form-item-bor">
+                    <div class="m-form-item-label">
+                        <label>类型</label>
+                        <i class="label-line">|</i>
+                    </div>
+                    <div class="m-form-item-control">
+                        <div class="checkbox">
+                            <label class="radio-inline">
+                                <input type="radio" value="housefund" name="account_type" checked>公积金
+                            </label>
+                            <label class="radio-inline">
+                                <input type="radio" value="shebao" name="account_type">社保
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="m-form-item m-form-item-bor">
+                    <div class="m-form-item-label">
+                        <label>省/区选择</label>
+                        <i class="label-line">|</i>
+                    </div>
+                    <div class="m-form-item-control" style="width: 47%">
+                        <select id="city_1" class="form-control">
+                            <option>--请选择--</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="m-form-item m-form-item-bor">
+                    <div class="m-form-item-label">
+                        <label>城市选择</label>
+                        <i class="label-line">|</i>
+                    </div>
+                    <div class="m-form-item-control" style="width: 47%">
+                        <select id="city_2" class="form-control">
+                            <option>--请选择--</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="m-form-item m-form-item-bor">
+                    <div class="m-form-item-label">
+                        <label>账号</label>
+                        <i class="label-line">|</i>
+                    </div>
+                    <div class="m-form-item-control">
+                        <input class="ipt" id="username" placeholder="请输入账号" type="text" autocomplete="off">
+                        <div class="error-tip">请输入账号</div>
+                    </div>
+                </div>
+                <div class="m-form-item m-form-item-bor">
+                    <div class="m-form-item-label">
+                        <label>密码</label>
+                        <i class="label-line">|</i>
+                    </div>
+                    <div class="m-form-item-control">
+                        <input class="ipt" id="password" placeholder="请输入密码" type="password" autocomplete="off">
+                    </div>
+                </div>
+                <div class="m-form-item">
+                    <button onclick="start_crawl_user()" type="button"
+                            class="btn-robot-submit m-btn m-btn-primary m-btn-block m-btn-lg">提交
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="robot-tip" id="bodyTip" style="display:none">
+    <div class="robot-tip-main" id="bodyTipmain"></div>
+</div>
+</body>
+<script type="text/javascript" src="//cdn.staticfile.org/jquery/1.10.2/jquery.min.js"></script>
+<script type="text/javascript" src="{% static 'js/accout_crawler.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/shebao_index.js' %}"></script>
+<script type="text/javascript">
+    var customer_id = "{{ customer_id }}";
+    var serial_no = "{{ serial_no }}";
+    var username = "";
+    var account_type = "";
+    var city = "";
+
+    function start_crawl_user() {
+        username = $("input#username").val().trim();
+        account_type = $("input[name='account_type']:checked").val();
+        city = $("select#city_2").val();
+        var ajax_data = {
+            "customer_id": customer_id,
+            "serial_no": serial_no,
+            "account_type": account_type,
+            "username": username,
+            "password": $("input#password").val(),
+            "city": city
+        };
+        ajax_crawl_user(ajax_data);
+    }
+
+    function ask_crawling_status() {
+        var ajax_data = {
+            "account_type": account_type,
+            "username": username,
+            "city": city
+        };
+        ajax_crawling_status(ajax_data, function (data) {
+
+        });
+    }
+</script>
+</html>

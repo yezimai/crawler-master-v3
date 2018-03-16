@@ -1,0 +1,18 @@
+# 本文件夹中tar文件是 kubernets 1.7.5 中dns所需要的三个镜像，连不上谷歌下不了
+# https://github.com/kubernetes/kubernetes/tree/release-1.7/cluster/addons/dns
+# kubectl exec busybox nslookup bqjr-crawler-ssdb-service.bqjr-crawler.svc.cluster.local
+# 至此所有svc pod 都可以在集群内部访问
+apiVersion: v1
+kind: Pod
+metadata:
+  name: busybox
+  namespace: default
+spec:
+  containers:
+  - image: busybox
+    command:
+      - sleep
+      - "3600"
+    imagePullPolicy: IfNotPresent
+    name: busybox
+  restartPolicy: Always

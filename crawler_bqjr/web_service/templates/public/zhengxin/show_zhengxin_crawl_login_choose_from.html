@@ -1,0 +1,13 @@
+{% extends 'public/base.html' %}
+
+{% load static %}
+
+{% block title %}央行征信认证{% endblock %}
+
+{% block content %}
+    <div class="con">
+        <img src="{% static 'public/images/login1_img.png' %}" class="log1img"/>
+        <a class="btn3" href="{% url 'show_zhengxin_reg' %}?customer_id={{ customer_id }}&serial_no={{ serial_no }}">首次开通央行征信查询</a>
+        <a class="btn4" href="{% url 'show_zhengxin_login' %}?customer_id={{ customer_id }}&serial_no={{ serial_no }}">已有帐号登录</a>
+    </div>
+{% endblock %}

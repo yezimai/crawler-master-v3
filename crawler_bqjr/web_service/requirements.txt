@@ -1,0 +1,10 @@
+requests
+pytz
+django
+django-oauth-toolkit
+django-cors-middleware
+pymysql
+numpy
+opencv-python
+Pillow
+piltesseract

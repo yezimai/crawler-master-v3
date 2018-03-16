@@ -1,0 +1,95 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    component: bqjr-crawler-web
+  name: bqjr-crawler-web-deployment
+  namespace: bqjr-crawler
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: bqjr-crawler-web-app
+        component: bqjr-crawler-web
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: crawler100
+      volumes:
+      - name: web-dir
+        hostPath:
+          path: "/data/code_source/crawler/"
+      - name: web-scripts
+        hostPath:
+          path: "/data/code_source/crawler/doc/deploy/k8s/k8s_scripts/"
+      - name: web-log
+        hostPath:
+          path: "/data/logs/web/"
+      - name: web-tmp
+        hostPath:
+          path: "/data/tmp/"
+      - name: web-pic
+        hostPath:
+          path: "/data/pictures/"
+      containers:
+      - image: docker.io/421084068/nginx
+        imagePullPolicy: IfNotPresent
+        args: [/bin/sh, -c,
+            'nginx -c /work/crawler_bqjr/web_service/nginx/nginx.conf -g "daemon off;" ']
+        volumeMounts:
+        - name: web-dir
+          mountPath: "/work/"
+        - name: web-log
+          mountPath: "/logs/"
+        - name: web-tmp
+          mountPath: "/tmp/"
+        - name: web-pic
+          mountPath: "/data/image_data/"
+        - name: web-scripts
+          mountPath: "/scripts/"
+
+        name: crawler-nginx
+        ports:
+        - name: web-service
+          containerPort: 80
+        - name: web-access
+          containerPort: 12000
+
+      - image: docker.io/421084068/driver-python36
+        imagePullPolicy: IfNotPresent
+        args: [/bin/sh, -c,
+            'cp -rf /work/crawler_bqjr/web_service/web_service/spider_urls.py /work/crawler_bqjr/web_service/web_service/urls.py && uwsgi --ini /work/crawler_bqjr/web_service/nginx/uwsgi_webservice.ini']
+        name: access-uwsgi
+        env:
+         - name: PYTHONPATH
+           value: "/work/crawler_bqjr/"
+        volumeMounts:
+        - name: web-dir
+          mountPath: "/work/"
+        - name: web-log
+          mountPath: "/logs/"
+        - name: web-tmp
+          mountPath: "/tmp/"
+        - name: web-pic
+          mountPath: "/data/image_data/"
+        - name: web-scripts
+          mountPath: "/scripts/"
+        ports:
+        - containerPort: 8000
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    component: bqjr-crawler-web
+  name: bqjr-crawler-web-service
+  namespace: bqjr-crawler
+spec:
+  ports:
+  - name: web-service
+    port: 80
+  selector:
+    app: bqjr-crawler-web-app
+    component: bqjr-crawler-web
+  externalIPs: [172.16.8.30]

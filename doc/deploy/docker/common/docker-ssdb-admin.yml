@@ -1,0 +1,14 @@
+# 提供公共服务
+#
+
+version: "2"
+
+services:
+  ssdb-admin:
+    image: phpssdbadmin
+    ports:
+      - "9111:9111"
+    volumes:
+      - /data/logs/ssdb/:/logs/
+    command: sh -c 'nginx && php-fpm'
+

@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <title>银行交易数据爬虫</title>
+    {% load static %}
+    <link rel="stylesheet" href="//cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+</head>
+<body>
+<div class="robot-main">
+    <div class="m-dialog robot-dialog">
+        <div class="m-dialog-hd">
+            <div class="m-dialog-title">银行交易数据查询系统</div>
+        </div>
+        <div class="m-dialog-md">
+            <div class="robot-form m-form" id="main_div">
+                <div class="m-form-item m-form-item-bor">
+                    <div class="m-form-item-label">
+                        <label>选择银行</label>
+                        <i class="label-line">|</i>
+                    </div>
+                    <div class="m-form-item-control" style="width: 47%">
+                        <select id="bank" class="form-control" onchange="change_bank(this)">
+                            <option value="农业银行">农业银行</option>
+                            <option value="建设银行">建设银行</option>
+                            <option value="工商银行">工商银行</option>
+                            <option value="邮政银行">邮政银行</option>
+                            <option value="中国银行">中国银行</option>
+                            <option value="招商银行">招商银行</option>
+                            <option value="交通银行">交通银行</option>
+                            <option value="兴业银行">兴业银行</option>
+                            <option value="民生银行">民生银行</option>
+                            <option value="光大银行">光大银行</option>
+                            <option value="平安银行">平安银行</option>
+                            <option value="中信银行">中信银行</option>
+                            <option value="浦发银行">浦发银行</option>
+                            <option value="广发银行">广发银行</option>
+                            <option value="华夏银行">华夏银行</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="m-form-item m-form-item-bor">
+                    <div class="m-form-item-label">
+                        <label id="username_label">银行卡号</label>
+                        <i class="label-line">|</i>
+                    </div>
+                    <div class="m-form-item-control">
+                        <input class="ipt" id="username" placeholder="银行卡号" type="text" autocomplete="off">
+                        <div class="error-tip">请输入账号</div>
+                    </div>
+                </div>
+                <div class="m-form-item m-form-item-bor">
+                    <div class="m-form-item-label">
+                        <label id="password_label">网银密码</label>
+                        <i class="label-line">|</i>
+                    </div>
+                    <div class="m-form-item-control">
+                        <input class="ipt" id="password" placeholder="网银登录密码" type="password" autocomplete="off">
+                    </div>
+                </div>
+                <div id="id_div" class="m-form-item m-form-item-bor" style="display:none">
+                    <div class="m-form-item-label">
+                        <label id="id_label">身份证号码</label>
+                        <i class="label-line">|</i>
+                    </div>
+                    <div class="m-form-item-control">
+                        <input class="ipt" id="id" placeholder="身份证号码" type="text" autocomplete="off">
+                    </div>
+                </div>
+                <div class="m-form-item">
+                    <button onclick="start_crawl_user()" type="button"
+                            class="btn-robot-submit m-btn m-btn-primary m-btn-block m-btn-lg">提交
+                    </button>
+                </div>
+            </div>
+            <div class="code-form m-form" id="captcha_div" style="display:none">
+                <div class="m-form-item">
+                    <div class="img-code">
+                        <img id="img_captcha" src="">
+                    </div>
+                </div>
+                <div class="m-form-item m-form-item-bor">
+                    <div class="m-form-item-label">
+                        <label id="codeType">验证码</label>
+                        <i class="label-line">|</i>
+                    </div>
+                    <div class="m-form-item-control">
+                        <input class="ipt" id="captcha" placeholder="请输入验证码" type="text" autocomplete="off">
+                    </div>
+                </div>
+                <div class="m-form-item">
+                    <button id="captcha_submit" type="button"
+                            class="btn-robot-submit m-btn m-btn-primary m-btn-block m-btn-lg">提交
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="robot-tip" id="bodyTip" style="display:none;">
+    <div class="robot-tip-main" id="bodyTipmain"></div>
+</div>
+</body>
+<script type="text/javascript" src="//cdn.staticfile.org/jquery/1.10.2/jquery.min.js"></script>
+<script type="text/javascript" src="{% static 'js/accout_crawler.js' %}"></script>
+<script type="text/javascript">
+    var customer_id = "{{ customer_id }}";
+    var serial_no = "{{ serial_no }}";
+    var username = "";
+    var account_type = "bank";
+    var bank = "";
+
+    function change_bank(select_input) {
+        var value = select_input.value;
+        var username_label = $("label#username_label");
+        var username = $("input#username");
+        var password_label = $("label#password_label");
+        var password = $("input#password");
+        var id_div = $("div#id_div");
+
+        username_label.text("银行卡号");
+        username.attr("placeholder", "银行卡号");
+        password_label.text("网银密码");
+        password.attr("placeholder", "网银登录密码");
+        id_div.hide();
+
+        if ("兴业银行" === value) {
+            password_label.text("交易密码");
+            password.attr("placeholder", "6位银行交易密码");
+            id_div.text("身份证后6位").show();
+            $("#id").attr("placeholder", "身份证号码后6位");
+        } else if ("中国银行" === value) {
+            password_label.text("密码");
+            password.attr("placeholder", "网银密码 或 6位银行交易密码");
+            username_label.text("账号");
+            username.attr("placeholder", "用户名 或 银行卡号");
+        } else if ("平安银行" === value || "浦发银行" === value || "建设银行" === value) {
+            username_label.text("身份证号");
+            username.attr("placeholder", "身份证号码");
+        } else if ("招商银行" === value) {
+            username_label.text("一网通账号");
+            username.attr("placeholder", "一网通账号");
+        }
+    }
+
+    function start_crawl_user() {
+        username = $("input#username").val().trim();
+        bank = $("select#bank").val();
+        var ajax_data = {
+            "customer_id": customer_id,
+            "serial_no": serial_no,
+            "account_type": account_type,
+            "username": username,
+            "password": $("input#password").val(),
+            "id": $("input#id").val().trim(),
+            "bank": bank
+        };
+        ajax_crawl_user(ajax_data);
+    }
+
+    function ask_crawling_status() {
+        var ajax_data = {
+            "account_type": account_type,
+            "username": username,
+            "bank": bank
+        };
+        ajax_crawling_status(ajax_data, function (data) {
+            var crawling_status = data.crawling_status;
+            if (crawling_status === "img_captcha") {  //图片验证码
+                $("div#main_div").hide();
+
+                if ($("#bank").val() === "邮政银行") {
+                    $("input#captcha").attr("placeholder", "请输入红色的验证码");
+                }
+                $("img#img_captcha").attr("src", data.img_src).show();
+                $('#codeType').text('验证码');
+                $("div#captcha_div").show();
+
+                $("button#captcha_submit").unbind("click").bind("click", function () {
+                    var img_captcha = $("input#captcha").val().trim();
+                    if (img_captcha === "") {
+                        dialog.error("图片验证码不能为空");
+                        return;
+                    }
+
+                    var ajax_data = {
+                        "account_type": "bank",
+                        "username": data.username,
+                        "img_uid": data.img_uid,
+                        "img_captcha": img_captcha
+                    };
+                    submit_captcha_code(ajax_data);
+                });
+            } else if (crawling_status === "sms_captcha") {  //短信验证码
+                $("div#main_div").hide();
+                $("img#img_captcha").hide();
+
+                $("input#captcha").val("");
+                $('#codeType').text('短信验证码');
+                $("div#captcha_div").show();
+
+                $("button#captcha_submit").unbind("click").bind("click", function () {
+                    var sms_captcha = $("input#captcha").val().trim();
+                    if (sms_captcha === "") {
+                        dialog.error("图片验证码不能为空");
+                        return;
+                    }
+
+                    var ajax_data = {
+                        "account_type": "bank",
+                        "username": data.username,
+                        "sms_uid": data.sms_uid,
+                        "sms_captcha": sms_captcha
+                    };
+                    submit_captcha_code(ajax_data);
+                });
+            }
+        });
+    }
+</script>
+</html>

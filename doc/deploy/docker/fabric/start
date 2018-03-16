@@ -1,0 +1,12 @@
+###sudo /bin/cp -rf /data/code_source/crawler/doc/deploy/* /data/deploy/###
+cd /data/git_source/crawler && sudo git pull
+sudo /bin/cp -rf /data/git_source/* /data/code_source/
+cd /data/code_source/crawler/crawler_bqjr/crawler_bqjr/browsers && sudo chmod -R 777 *
+
+cd /data/code_source/crawler/crawler_bqjr/web_service/web_service && sudo rm -f settings.py
+sudo cp -f /data/settings/webservice_settings.py /data/code_source/crawler/crawler_bqjr/web_service/web_service/settings.py
+cd /data/code_source/crawler/crawler_bqjr/crawler_bqjr && sudo rm -f settings.py
+sudo cp -f /data/settings/crawler_settings.py /data/code_source/crawler/crawler_bqjr/crawler_bqjr/settings.py
+cd /data/code_source/crawler/crawler_bqjr/data_storage && sudo rm -f db_settings.py
+sudo cp -f /data/settings/db_storage_db_settings.py /data/code_source/crawler/crawler_bqjr/data_storage/db_settings.py
+

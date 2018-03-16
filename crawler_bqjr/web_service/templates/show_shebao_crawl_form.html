@@ -1,0 +1,58 @@
+{% extends 'show_shebao_crawl_form_base.html' %}
+{% load static %}
+{% block cotent %}
+    <form id="reg_form" method="post" action="">
+        <div class="robot-form m-form" id="main_div">
+            <div class="m-form-item m-form-item-bor">
+                <div class="m-form-item-label">
+                    <label><span class="must_item">*</span>省/区选择</label>
+                    <i class="label-line">|</i>
+                </div>
+                <div class="m-form-item-control">
+                    <select name="city_1" id="city_1" class="form-control" required>
+                        <option>--请选择--</option>
+                    </select>
+                </div>
+            </div>
+            <div class="m-form-item m-form-item-bor">
+                <div class="m-form-item-label">
+                    <label><span class="must_item">*</span>城市选择</label>
+                    <i class="label-line">|</i>
+                </div>
+                <div class="m-form-item-control">
+                    <select name="city_2" id="city_2" class="form-control" required>
+                        <option>--请选择--</option>
+                    </select>
+                </div>
+            </div>
+            <div class="m-form-item m-form-item-bor">
+                <div class="m-form-item-label">
+                    <label><span class="must_item">*</span>登录用户名</label>
+                    <i class="label-line">|</i>
+                </div>
+                <div class="m-form-item-control">
+                    <input class="ipt" id="username" name="username" placeholder="请输入登录名"
+                           type="text" autocomplete="off" required>
+                    <div class="error-tip">请输入登录名</div>
+                </div>
+            </div>
+            <div class="m-form-item m-form-item-bor">
+                <div class="m-form-item-label">
+                    <label><span class="must_item">*</span>登录密码</label>
+                    <i class="label-line">|</i>
+                </div>
+                <div class="m-form-item-control">
+                    <input class="ipt" id="password" name="password" placeholder="登录密码"
+                           type="text" autocomplete="off" required>
+                    <div class="error-tip">登录密码</div>
+                </div>
+            </div>
+            <div class="m-form-item">
+                <button class="btn-robot-submit m-btn m-btn-primary m-btn-block m-btn-lg"
+                        id="form_submit" type="submit">提交
+                </button>
+            </div>
+        </div>
+    </form>
+    <script type="text/javascript" src="{% static 'js/shebao_index.js' %}"></script>
+{% endblock %}

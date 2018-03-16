@@ -1,0 +1,39 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    component: bqjr-crawler-spider-ecommerce
+  name: bqjr-crawler-spider-ecommerce-deployment
+  namespace: bqjr-crawler
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: bqjr-crawler-spider-ecommerce-app
+        component: bqjr-crawler-spider
+    spec:
+      volumes:
+      - name: spider-ecommerce-code
+        hostPath:
+          path: "/data/code_source/crawler/crawler_bqjr/"
+      - name: spider-ecommerce-log
+        hostPath:
+          path: "/data/logs/crawler/"
+      containers:
+      - image: docker.io/421084068/driver-python36
+        imagePullPolicy: IfNotPresent
+        command: ["python3","/work/crawler_bqjr/run_ecommerce_spiders.py"]
+        volumeMounts:
+        - name: spider-ecommerce-code
+          mountPath: "/work/crawler_bqjr/"
+        - name: spider-ecommerce-log
+          mountPath: "/logs/"
+        name: crawler-spider-ecommerce
+        env:
+        - name: LANG
+          value: "Zn_CN.UTF-8"
+        - name: LC_ALL
+          value: "en_US.utf8"
+        - name: PYTHONPATH
+          value: /work/crawler_bqjr

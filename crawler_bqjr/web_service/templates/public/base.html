@@ -1,0 +1,96 @@
+{% load static %}
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0">
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <link type="text/css" rel="stylesheet" href="//cdn.bootcss.com/layer/3.1.0/mobile/need/layer.css"/>
+    <link type="text/css" rel="stylesheet" href="//cdn.bootcss.com/sweetalert/1.1.3/sweetalert.min.css">
+    <link type="text/css" rel="stylesheet" href="{% static 'public/css/main.css' %}"/>
+    <link type="text/css" rel="stylesheet" href="{% static 'css/msgbox.css' %}">
+    <style type="text/css">
+        .robot-tip {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, .3);
+            border-radius: 8px;
+            color: #fff;
+            text-align: center;
+        }
+
+        .robot-tip-main {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            padding: 20px;
+            background: rgba(0, 0, 0, .8);
+            border-radius: 15px;
+        }
+
+        .loading-ico {
+            display: inline-block;
+            width: 42px;
+            height: 20px;
+            background: url(../../static/img/loading.gif) no-repeat;
+        }
+
+        .main-title {
+            height: 4.4rem;
+            line-height: 4.4rem;
+            font-size: 1.7rem;
+            text-align: center;
+            color: #fff;
+            position: fixed;
+            width: 100%;
+            z-index: 10000;
+            background-color: #147ec7;
+        }
+
+        .icon-back {
+            position: fixed;
+            top: 1.5rem;
+            left: 1.8rem;
+            width: 1.4rem;
+            height: 1.4rem;
+            border-left: .2rem solid #fff;
+            border-top: .2rem solid #fff;
+            z-index: 10001;
+            -webkit-transform: rotate(315deg);
+        }
+    </style>
+    {% block css %}{% endblock %}
+</head>
+
+<body>
+<div class="nav">
+    <a href="javascript:window.history.back();" class="icon-back"><cite></cite></a>
+    <span class="head-title main-title">{% block title %}{% endblock %}</span>
+</div>
+
+<div style="padding-top:4.1rem">
+    {% block content %}{% endblock %}
+</div>
+
+<div class="robot-tip" id="bodyTip">
+    <div class="robot-tip-main" id="bodyTipmain"></div>
+</div>
+<div class="robot-tip" id="pageTip"></div>
+
+<script type="text/javascript" src="//cdn.staticfile.org/jquery/1.11.0/jquery.min.js"></script>
+<script type="text/javascript" src="//cdn.bootcss.com/jquery-validate/1.9.0/jquery.validate.min.js"></script>
+<script type="text/javascript" src="//cdn.bootcss.com/layer/3.1.0/mobile/layer.js"></script>
+<script type="text/javascript" src="//cdn.bootcss.com/sweetalert/1.1.3/sweetalert.min.js"></script>
+<script type="text/javascript" src="{% static 'public/js/dialog.js' %}"></script>
+<script type="text/javascript" src="{% static 'public/js/main.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/accout_crawler.js' %}"></script>
+{% block script %}{% endblock %}
+
+</body>
+</html>

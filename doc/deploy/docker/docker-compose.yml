@@ -1,0 +1,51 @@
+version: "2"
+
+services:
+  communications-spider:
+    image: driver-python36
+    user: root
+    volumes:
+      - /data/code_source/crawler/crawler_bqjr/:/work/crawler_bqjr/
+      - /data/logs/crawler/:/logs/
+    environment:
+      - LANG=Zn_CN.UTF-8
+      - LC_ALL=en_US.utf8
+    working_dir: /work/crawler_bqjr/
+    command: python3 ./run_communications_spiders.py
+
+  ecommerce-spider:
+    image: driver-python36
+    user: root
+    volumes:
+      - /data/code_source/crawler/crawler_bqjr/:/work/crawler_bqjr/
+      - /data/logs/crawler/:/logs/
+    environment:
+      - LANG=Zn_CN.UTF-8
+      - LC_ALL=en_US.utf8
+    working_dir: /work/crawler_bqjr/
+    command: python3 ./run_ecommerce_spiders.py
+
+  xuexin-spider:
+    image: driver-python36
+    user: root
+    volumes:
+      - /data/code_source/crawler/crawler_bqjr/:/work/crawler_bqjr/
+      - /data/logs/crawler/:/logs/
+      - /data/pictures/xuexin/:/data/image_data/
+    environment:
+      - LANG=Zn_CN.UTF-8
+      - LC_ALL=en_US.utf8
+    working_dir: /work/crawler_bqjr/
+    command: python3 ./run_xuexin_spiders.py
+
+  zhengxin-spider:
+    image: driver-python36
+    user: root
+    volumes:
+      - /data/code_source/crawler/crawler_bqjr/:/work/crawler_bqjr/
+      - /data/logs/crawler/:/logs/
+    environment:
+      - LANG=Zn_CN.UTF-8
+      - LC_ALL=en_US.utf8
+    working_dir: /work/crawler_bqjr/
+    command: python3 ./run_zhengxin_spiders.py

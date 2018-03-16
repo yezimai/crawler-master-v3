@@ -1,0 +1,22 @@
+﻿版本2.33：Supports Chrome v60-62
+
+----------ChromeDriver v2.33 (2017-10-03)----------
+Supports Chrome v60-62
+
+
+----------ChromeDriver v2.36 (2018-03-08)----------
+Supports Chrome v65-67
+
+
+本地测试使用的是：
+ChromeDriver v2.36  Chrome v65-67   chromedriver.exe
+
+
+服务器使用的是：
+ChromeDriver v2.33  Chrome v60-62  chromedriver
+
+
+webdriver下载地址:
+http://npm.taobao.org/
+https://chromedriver.storage.googleapis.com/2.36/
+

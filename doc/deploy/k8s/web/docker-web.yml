@@ -1,0 +1,38 @@
+# 提供web服务
+
+version: "2"
+
+services:
+  django:
+    restart: always
+    image: driver-python36
+    networks:
+      - web-service
+    volumes:
+      - /data/code_source_oauth/crawler/crawler_bqjr/:/work/crawler_bqjr/
+      - /data/logs/web/:/logs/
+    ports:
+      - "8001:8001"
+    environment:
+      - PYTHONPATH=/work/crawler_bqjr/
+    working_dir: /work/crawler_bqjr/web_service/
+    command: uwsgi --ini /work/crawler_bqjr/web_service/nginx/uwsgi_access.ini
+    #external_links:
+    #  - mongo
+    #  - ssdb
+
+  nginx:
+    restart: always
+    image: docker.io/nginx
+    networks:
+      - web-service
+    ports:
+      - "12000:12000"
+    volumes:
+      - /data/code_source_oauth/crawler/crawler_bqjr/web_service/:/work/crawler_bqjr/web_service/
+      - /data/logs/web/:/logs/
+    working_dir: /work/crawler_bqjr/web_service/nginx
+    command: nginx -c /work/crawler_bqjr/web_service/nginx/nginx_access.conf -g "daemon off;"
+
+networks:
+  web-service:

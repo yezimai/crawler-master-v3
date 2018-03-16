@@ -1,0 +1,69 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    component: bqjr-crawler-rabbitmq
+  name: bqjr-crawler-rabbitmq-deployment
+  namespace: bqjr-crawler
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: bqjr-crawler-rabbitmq-app
+        component: bqjr-crawler-rabbitmq
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: crawler101
+      volumes:
+      - name: rabbitmq-data
+        hostPath:
+          path: "/data/rabbitmq/"
+      containers:
+      - image: docker.io/421084068/rabbitmq
+        imagePullPolicy: IfNotPresent
+        args: [/bin/sh, -c,
+            'echo  >> /etc/hosts && echo 127.0.0.1    rabbit@bqjr_rabbitmq >> /etc/hosts && echo 127.0.0.1    bqjr_rabbitmq >> /etc/hosts && docker-entrypoint.sh rabbitmq-server && rabbitmq-server']
+        volumeMounts:
+        - name: rabbitmq-data
+          mountPath: "/var/lib/rabbitmq/"
+        name: crawler-rabbitmq
+        ports:
+        - containerPort: 5672
+        - containerPort: 15672
+        env:
+        - name: RABBITMQ_NODENAME
+          value: "rabbit@bqjr_rabbitmq"
+        - name: RABBITMQ_MNESIA_BASE
+          value: "/var/lib/rabbitmq/mnesia"
+        - name: RABBITMQ_MNESIA_DIR
+          value: "/var/lib/rabbitmq/mnesia/rabbit@bqjr_rabbitmq"
+        - name: RABBITMQ_LOGS
+          value: "/var/lib/rabbitmq/rabbit@bqjr_rabbitmq.log"
+        - name: RABBITMQ_SASL_LOGS
+          value: "/var/lib/rabbitmq/rabbit@bqjr_rabbitmq-sasl.log"
+        - name: RABBITMQ_PID_FILE
+          value: "/var/lib/rabbitmq/mnesia/rabbit@bqjr_rabbitmq.pid"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    component: bqjr-crawler-rabbitmq
+  name: bqjr-crawler-rabbitmq-service
+  namespace: bqjr-crawler
+spec:
+  ports:
+  - name: mq-connect
+    port: 5672
+    protocol: TCP
+    targetPort: 5672
+  - name: mq-web
+    port: 15672
+    protocol: TCP
+    targetPort: 15672
+  selector:
+    app: bqjr-crawler-rabbitmq-app
+    component: bqjr-crawler-rabbitmq
+  externalIPs: [172.16.8.30]

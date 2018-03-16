@@ -1,0 +1,110 @@
+{% extends 'public/base.html' %}
+
+{% load static %}
+
+{% block title %}央行征信认证{% endblock %}
+
+{% block content %}
+    <form class="reg">
+        <ul class="rcon">
+            <li class="rconli0"></li>
+            <li class="rconli">
+                <span class="rconli_span">用户名</span>
+                <input type="text" name="username" id="username" class="inval inval1" placeholder="请输入用户名"/>
+                <span class="rconli_del"><img src="{% static 'public/images/reg_del.png' %}"
+                                              class="rconli_del_img"/></span>
+            </li>
+            <li class="rconli">
+                <span class="rconli_span">密   码</span>
+                <input type="password" class="inval inval1" name="password" id="password" placeholder="6-20位数字及大小字母，无特殊字符"/>
+                <span class="rconli_del"><img src="{% static 'public/images/reg_del.png' %}"
+                                              class="rconli_del_img"/></span>
+            </li>
+        </ul>
+    </form>
+    <a class="btn2">登录</a>
+    <a class="btn1">登录</a>
+    <p class="log1p">
+        <a class="log1p_a1" href="{% url 'back_username' %}">忘记用户名</a>
+        <a class="log1p_a2" href="{% url 'back_passwd' %}">忘记密码</a>
+    </p>
+{% endblock %}
+
+{% block script %}
+    <script type="text/javascript">
+        var customer_id = "{{ customer_id }}";
+        var serial_no = "{{ serial_no }}";
+        var username = "";
+        var account_type = "zhengxin";
+
+        function start_crawl_user() {
+            username = $("input#username").val().trim();
+            var ajax_data = {
+                "customer_id": customer_id,
+                "serial_no": serial_no,
+                "account_type": account_type,
+                "username": username,
+                "password": $("input#password").val()
+            };
+            ajax_with_tip("{% url 'zhengxin_login' %}", ajax_data, function (data) {
+                if (data.succ) {
+                    // 如果是true 转跳输入身份识别码页面
+                    if (data.succ_msg !== '') {
+                        dialog.notice(get_success_dialog_msg(data.succ_msg),
+                                       "{% url 'show_zhengxin_crawler_choose_form' %}");
+                    } else {
+                        window.location.href = "{% url 'show_zhengxin_crawler_form' %}";
+                    }
+                } else {
+                    // 如果为false 转跳问题验证页面
+                    window.location.href = "{% url 'option_question' %}";
+                }
+            }, function (data) {
+                dialog.notice(get_error_dialog_msg(data.msg), "{% url 'show_zhengxin_login' %}", "朕知道了");
+            });
+        }
+
+        $(function () {
+            var insRules = {
+                rules: {
+                    username: {
+                        required: true
+                    },
+                    password: {
+                        required: true,
+                        rangelength: [6, 20]
+                    }
+                },
+                messages: {
+                    username: {
+                        required: '请输入用户名'
+                    },
+                    password: {
+                        required: '请输入密码',
+                        rangelength: '密码在6到20位之间'
+                    }
+                },
+                onfocusout: function (element, event) {
+                    $('.error').html();
+                    $(element).valid();
+                }
+            };
+            $('.reg').validate(insRules);
+
+            $('.inval').on('input', function () {
+                if ($('.reg').valid()) {
+                    start_btn_enable();
+                } else {
+                    start_btn_disable();
+                }
+            });
+
+            $('.btn1').click(function () {
+                if (!$('.reg').valid()) {
+                    return false;
+                }
+                start_crawl_user();
+            })
+        });
+    </script>
+{% endblock %}

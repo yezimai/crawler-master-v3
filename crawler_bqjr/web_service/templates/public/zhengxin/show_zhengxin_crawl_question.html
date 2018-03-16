@@ -1,0 +1,80 @@
+{% extends 'public/base.html' %}
+
+{% load static %}
+
+{% block title %}央行征信问题验证{% endblock %}
+
+{% block content %}
+    <div class="con">
+        <div class="logtime">
+            <p class="logtime_p1">
+                <img src="{% static 'public/images/log3_titbg.png' %}" class="logtime_p1_img"/>
+                请您在10分钟内完成以下5个问题，倒计时
+            </p>
+            <div class="logtime_p2 time-item" id="sp_time">
+                <strong id="minute_show"></strong>
+                <strong id="second_show"></strong>
+            </div>
+        </div>
+        <div id="questions">
+        </div>
+    </div>
+    <div class="waitcon" style="display:none">
+        <img src="{% static 'public/images/wait_img.gif' %}" class="wait_img"/>
+    </div>
+{% endblock %}
+
+{% block script %}
+    <script type="text/javascript">
+        var intDiff = 600;	//倒计时总秒数量
+        function timer(intDiff) {
+            window.setInterval(function () {
+                var day = 0,
+                    hour = 0,
+                    minute = 0,
+                    second = 0;//时间默认值
+                if (intDiff > 0) {
+                    day = Math.floor(intDiff / (60 * 60 * 24));
+                    hour = Math.floor(intDiff / (60 * 60)) - (day * 24);
+                    minute = Math.floor(intDiff / 60) - (day * 24 * 60) - (hour * 60);
+                    second = Math.floor(intDiff) - (day * 24 * 60 * 60) - (hour * 60 * 60) - (minute * 60);
+                }
+                if (minute <= 9) minute = '0' + minute;
+                if (second <= 9) second = '0' + second;
+
+                if (minute <= 0 && second <= 0) {
+                    $('.logtime_btn2').show();
+                    $('.logtime_btn3').hide();
+                }
+                $('#minute_show').html('<s></s>' + minute + ' :');
+                $('#second_show').html('<s></s>' + second + '');
+                intDiff--;
+            }, 1000);
+        }
+
+        $(function () {
+            //timer(intDiff);
+
+            ajax_with_tip("{% url 'option_question_detail' %}", "", function (data) {
+                var stri = '', n = 0;
+                $.each(data.datas, function (key, value) {
+                    stri += '<ul class="log3_ul">';
+                    stri += '<li class="log3_li">' + key.toString() + '</li>';
+                    stri += '<li class="log3_li"><label class="log3_li_label"><input class="log3_labrad" type="radio" name="key[' + n + ']options" value="1" onclick="setValue(' + n + ',this)"/>' + value[0] + '</label></li>';
+                    stri += '<li class="log3_li"><label class="log3_li_label"><input class="log3_labrad" type="radio" name="key[' + n + ']options" value="2" onclick="setValue(' + n + ',this)"/>' + value[1] + '</label></li>';
+                    stri += '<li class="log3_li"><label class="log3_li_label"><input class="log3_labrad" type="radio" name="key[' + n + ']options" value="3" onclick="setValue(' + n + ',this)"/>' + value[2] + '</label></li>';
+                    stri += '<li class="log3_li"><label class="log3_li_label"><input class="log3_labrad" type="radio" name="key[' + n + ']options" value="4" onclick="setValue(' + n + ',this)"/>' + value[3] + '</label></li>';
+                    stri += '<li class="log3_li"><label class="log3_li_label"><input class="log3_labrad" type="radio" name="key[' + n + ']options" value="5" onclick="setValue(' + n + ',this)"/>' + value[4] + '</label></li>';
+                    {#                        stri +='<p><input class="radio_type1" type="radio" name="key['+n+']options" value="2"   onclick="setValue('+n+',this)"/><span>'+value[1]+'</span> </p><br/>'#}
+                    stri += '</ul>';
+                    n += 1;
+                });
+                stri += '<a class="logtime_btn2">提交注册</a><a class="logtime_btn3">提交注册</a>';
+                stri += "<script src='{% static 'js/zhengxin_dati.js' %}'></" + "script>";
+                $('#questions').html(stri);
+            }, function (data) {
+                dialog.notice(get_error_dialog_msg(data.msg), "{% url 'show_zhengxin_login' %}", "朕知道了");
+            });
+        });
+    </script>
+{% endblock %}

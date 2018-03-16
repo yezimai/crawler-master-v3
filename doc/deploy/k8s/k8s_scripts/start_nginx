@@ -1,0 +1,2 @@
+echo "nameserver 10.25.1.6" >> /etc/resolv.conf
+nginx -c /work/crawler_bqjr/web_service/nginx/nginx.conf -g "daemon off;"

@@ -1,0 +1,466 @@
+{% extends 'public/base.html' %}
+
+{% load static %}
+
+{% block title %}运营商数据认证{% endblock %}
+
+{% block content %}
+    <form class="reg">
+        <div class="con" id="main_div">
+            <img src="{% static 'public/images/operator_img01.png' %}" class="log1img"/>
+            <ul class="rcon">
+                <li class="rconli0"></li>
+                <li class="rconli">
+                    <span class="rconli_span">手机号码</span>
+                    <input type="text" id="username" name="username" class="inval inval1" placeholder="请输入手机号码"/>
+                    <span class="rconli_del">
+                        <img src="{% static 'public/images/reg_del.png' %}" class="rconli_del_img"/>
+                    </span>
+                </li>
+                <li class="rconli">
+                    <span class="rconli_span">服务密码</span>
+                    <input type="password" class="inval inval1" name="password" id="password" placeholder="手机运营商服务密码"/>
+                    <span class="rconli_del">
+                        <img src="{% static 'public/images/reg_del.png' %}" class="rconli_del_img"/>
+                    </span>
+                </li>
+            </ul>
+            <a class="btn2 login-btn2">开始认证</a>
+            <a class="btn1 login-btn1">开始认证</a>
+            <p class="log1p">
+                <a class="log1p_a2" href="#" onclick="show_forget_pwd()">忘记密码</a>
+            </p>
+            <p class="rfoot2">温馨提示：<br/>授权成功后将收到运营商的通知短信，这是正常现象，无需担心</p>
+        </div>
+        <div class="con" id="captcha_div" style="display:none">
+            <ul class="rcon">
+                <li class="rconli0"></li>
+                <li class="rconli">
+                    <div id="img_captcha_div" class="m-form-item m-form-item-bor">
+                        <span class="rconli_span">图片验证码</span>
+                        <input type="text" name="picyzm" id="img_captcha" class="inval inval2" placeholder="请输入验证码"/>
+                        <img class="yzm" id="img_src" src=""/>
+                    </div>
+                </li>
+                <li class="rconli">
+                    <div id="sms_captcha_div" class="m-form-item m-form-item-bor">
+                        <span class="rconli_span">短信动态码</span>
+                        <input type="text" name="smsyzm" id="sms_captcha" class="inval inval2" placeholder="请输入短信动态码"/>
+                        <input type="hidden" id="sms_type" value="">
+                        <input type="hidden" id="sms_code" value="">
+                        <input type="hidden" id="is_click" value="false">
+                        <input type="hidden" id="check_timeout" value="false">
+                        <img src="" class="yzm"/>
+                        <input type="button" id="sms_btn" class="yzm btn_1" value="获取验证码"/>
+                    </div>
+                </li>
+                <li class="rconli">
+                    <div id="full_name_div" class="m-form-item m-form-item-bor" style="display:none">
+                        <span class="rconli_span">姓名</span>
+                        <input type="text" name="nameyzm" id="full_name" class="inval inval2" placeholder="请输入姓名"/>
+                    </div>
+                </li>
+                <li class="rconli">
+                    <div id="id_card_div" class="m-form-item m-form-item-bor" style="display:none">
+                        <span class="rconli_span">身份证号</span>
+                        <input type="text" name="idcardyzm" id="id_card" class="inval inval2" placeholder="请输入身份证号"/>
+                    </div>
+                </li>
+            </ul>
+            <a class="btn2 captcha-btn2">提交</a>
+            <a class="btn1 captcha-btn1">提交</a>
+            <p class="rfoot2">温馨提示：<br/>授权成功后将收到运营商的通知短信，这是正常现象，无需担心</p>
+        </div>
+    </form>
+{% endblock %}
+
+{% block script %}
+    <script type="text/javascript">
+        var customer_id = "{{ customer_id }}";
+        var serial_no = "{{ serial_no }}";
+        var username = "";
+        var account_type = "communications";
+
+        // 判断手机号码的运营商
+        function check_phone_type(phone) {
+            var result = null;
+            $.ajax({
+                async: false,
+                url: '{% url "check_communications" %}',
+                data: {"username": phone},
+                type: 'POST',
+                dataType: 'json',
+                timeout: 5000,
+                traditional: true,
+                cache: false,
+                success: function (data) {
+                    if (data.status === 'ok') {
+                        result = data['brand'];
+                    }
+                }
+            });
+            return result;
+        }
+
+        function show_forget_pwd() {
+            dialog.notice("请拨打客服热线进行密码重置。<br/>联通:10010&nbsp;&nbsp;&nbsp;移动:10086&nbsp;&nbsp;&nbsp;电信:10001",
+                           "{% url 'show_communications_crawler_form' %}");
+        }
+
+        function start_crawl_user() {
+            username = $("input#username").val().trim();
+            var ajax_data = {
+                "customer_id": customer_id,
+                "serial_no": serial_no,
+                "account_type": account_type,
+                "username": username,
+                "password": $("input#password").val()
+            };
+            ajax_crawl_user(ajax_data);
+        }
+
+        function ask_crawling_status() {
+            var ajax_data = {
+                "account_type": account_type,
+                "username": username
+            };
+            ajax_crawling_status(ajax_data, function (data) {
+                var crawling_status = data.crawling_status;
+                if (crawling_status === "img_captcha") {     // 图片验证码
+                    $("p.rfoot2").hide();
+                    $("div#main_div").hide();
+                    $("div#sms_captcha_div").hide();
+
+                    $("img#img_src").attr("src", data.img_src);
+                    $("input#img_captcha").val("");
+                    $("div#img_captcha_div").show();
+                    $("div#captcha_div").show();
+
+                    $(".captcha-btn1").unbind("click").bind("click", function () {
+                        var img_captcha = $("input#img_captcha").val().trim();
+                        if (img_captcha === "") {
+                            dialog.error("图片验证码不能为空");
+                            return;
+                        }
+
+                        var ajax_data = {
+                            "account_type": account_type,
+                            "username": data.username,
+                            "img_uid": data.img_uid,
+                            "img_captcha": img_captcha
+                        };
+                        submit_captcha_code(ajax_data);
+                    });
+                } else if (crawling_status === "sms_captcha") {  // 短信验证码
+                    $("p.rfoot2").hide();
+                    $("div#main_div").hide();
+                    $("div#img_captcha_div").hide();
+
+                    $("input#check_timeout").val("true");    // 设置检查验证码超时状态为true
+                    $("input#sms_type").val(data.sms_type);
+                    $("input#sms_captcha").val("");
+                    $("div#sms_captcha_div").show();
+                    $("div#captcha_div").show();
+
+                    $(".captcha-btn1").unbind("click").bind("click", function () {
+                        var is_click = $("input#is_click");
+                        if (is_click.val() === "true") {
+                            var sms_captcha = $("input#sms_captcha").val().trim();
+                            if (sms_captcha === "") {
+                                dialog.error("短信验证码不能为空");
+                                return;
+                            }
+
+                            var ajax_data = {
+                                "account_type": account_type,
+                                "username": data.username,
+                                "sms_uid": data.sms_uid,
+                                "sms_captcha": sms_captcha
+                            };
+                            submit_captcha_code(ajax_data);
+
+                            is_click.val("false");
+                            $("input#check_timeout").val("false");
+                            $("input#sms_code").val(sms_captcha);
+                        } else {
+                            dialog.error("请发送短信验证码");
+                        }
+                    });
+
+                    refresh_check_timeout();  // 开始检测验证码是否超时
+                } else if (crawling_status === "img_sms_captcha") {  // 图片短信验证码
+                    $("div#main_div").hide();
+
+                    $("img#img_src").attr("src", data.img_src);
+                    $("input#check_timeout").val("true");    // 设置检查验证码超时状态为true
+                    $("input#sms_type").val(data.sms_type);
+                    $('input[id$="_captcha"]').val("");
+                    $('div[id$="captcha_div"]').show();
+
+                    $(".captcha-btn1").unbind("click").bind("click", function () {
+                        var is_click = $("input#is_click");
+                        if (is_click.val() === "true") {
+                            var sms_code_input = $("input#sms_code");
+                            var sms_captcha = $("input#sms_captcha").val().trim();
+                            var img_captcha = $("input#img_captcha").val().trim();
+                            if (sms_captcha === "") {
+                                dialog.error("短信验证码不能为空");
+                                return;
+                            } else if (img_captcha === "") {
+                                dialog.error("图形验证码不能为空");
+                                return;
+                            } else if (sms_captcha === sms_code_input.val().trim()) {
+                                dialog.error("需要再次发送短信验证码");
+                                return;
+                            }
+
+                            var ajax_data = {
+                                "account_type": account_type,
+                                "username": data.username,
+                                "img_uid": data.img_uid,
+                                "sms_uid": data.sms_uid,
+                                "img_captcha": img_captcha,
+                                "sms_captcha": sms_captcha
+                            };
+                            submit_captcha_code(ajax_data);
+
+                            $("input#check_timeout").val("false");
+                            sms_code_input.val(sms_captcha);
+                            is_click.val("false");
+                        } else {
+                            dialog.error("需要再次发送短信验证码");
+                        }
+                    });
+
+                    refresh_check_timeout();  // 开始检测验证码是否超时
+                } else if (crawling_status === "name_idcard_sms_captcha") {  // 姓名、身份证号、短信验证码
+                    $("div#main_div").hide();
+                    $("div#img_captcha_div").hide();
+
+                    $("input#check_timeout").val("true");    // 设置检查验证码超时状态为true
+                    $("input#sms_type").val(data.sms_type);
+                    $("input#sms_captcha").val("");
+                    $('div#full_name_div').show();
+                    $('div#id_card_div').show();
+                    $('div#sms_captcha_div').show();
+                    $("div#captcha_div").show();
+
+                    $(".captcha-btn1").unbind("click").bind("click", function () {
+                        if ($("input#is_click").val() === "true") {
+                            var sms_captcha = $("input#sms_captcha").val().trim();
+                            var name = $("input#full_name").val().trim();
+                            var id_card = $("input#id_card").val().trim();
+                            if (sms_captcha === "") {
+                                dialog.error("短信验证码不能为空");
+                                return;
+                            } else if (name === "") {
+                                dialog.error("姓名不能为空");
+                                return;
+                            } else if (id_card === "") {
+                                dialog.error("身份证号不能为空");
+                                return;
+                            }
+
+                            var ajax_data = {
+                                "account_type": account_type,
+                                "username": data.username,
+                                "sms_uid": data.sms_uid,
+                                "sms_captcha": sms_captcha,
+                                "name": name,
+                                "id_card": id_card
+                            };
+
+                            telecom_bills_validation(ajax_data);
+                        } else {
+                            dialog.error("请发送短信验证码");
+                        }
+                    });
+
+                    refresh_check_timeout();  // 开始检测验证码是否超时
+                }
+            });
+        }
+
+        // 短信验证码倒计时
+        sms_btn_times = 61;
+        function change_sms_btn() {
+            show_sms_btn("sms_btn", 61);
+        }
+
+        // 轮询检查
+        function refresh_check_timeout() {
+            if ($("input#check_timeout").val() === 'true') {
+                setTimeout("check_timeout()", 1000);
+            }
+        }
+
+        // 当在短信验证码页面时轮询ssdb，防止超时
+        function check_timeout() {
+            $.ajax({
+                url: "{% url 'check_sms_timeout' %}",
+                data: {
+                    "account_type": account_type,
+                    "username": username
+                },
+                type: 'POST',
+                dataType: 'json',
+                timeout: 30000,
+                traditional: true,
+                cache: false,
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    refresh_check_timeout();
+                },
+                success: function (data) {
+                    if (data.status === 'ok') {
+                        if (data.crawling_status === "error") {
+                            send_msg_to_parent(data, customer_id, serial_no);
+                            dialog.notice(get_error_dialog_msg(data.crawling_info + " " + data.crawling_msg),
+                                           "{% url 'show_communications_crawler_form' %}");
+                        } else {
+                            refresh_check_timeout();
+                        }
+                    } else {
+                        refresh_check_timeout();
+                    }
+                }
+            });
+        }
+
+        // 电信查询通话记录的验证，暂时不用，可以绕过
+        function telecom_bills_validation(form_data) {
+            tip("loading");
+            $.ajax({
+                url: "{% url 'telecom_bills_validation' %}",
+                data: form_data,
+                type: 'POST',
+                dataType: 'json',
+                timeout: 30000,
+                traditional: true,
+                cache: false,
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    refresh_crawling_status();
+                    dialog.error("执行失败，请重试");
+                },
+                success: function (data) {
+                    if (data.status === "ok") {
+                        var sms_captcha_str = form_data["sms_captcha"] + "_" + form_data["name"] + "_" + form_data["id_card"];
+                        var ajax_data = {
+                            "account_type": account_type,
+                            "username": form_data["username"],
+                            "name_idcard_sms_uid": form_data["sms_uid"],
+                            "name_idcard_sms_captcha": sms_captcha_str
+                        };
+                        submit_captcha_code(ajax_data);
+
+                        $("input#is_click").val("false");
+                        $("input#check_timeout").val("false");
+                        $("input#sms_code").val(form_data["sms_captcha"]);
+                        $('div#full_name_div').hide();
+                        $('div#id_card_div').hide();
+                        $("div#captcha_div").hide();
+                    } else {
+                        tip(false);
+                        dialog.error("执行异常：" + data.msg);
+                        console.log(data.msg);
+                    }
+                }
+            });
+        }
+
+        $(function () {
+            var loginRules = {
+                rules: {
+                    username: {
+                        required: true,
+                        mobileFormart: true
+                    },
+                    password: {
+                        required: true
+                    },
+                    smsyzm: {
+                        required: true
+                    },
+                    picyzm: {
+                        required: true
+                    }
+                },
+                messages: {
+                    username: {
+                        required: "请输入手机号码"
+                    },
+                    password: {
+                        required: '请输入服务密码'
+                    },
+                    smsyzm: {
+                        required: '请输入短信验证码'
+                    },
+                    picyzm: {
+                        required: '请输入图片验证码'
+                    }
+                },
+
+                onfocusout: function (element, event) {
+                    $('.error').html();
+                    $(element).valid();
+                }
+            };
+
+            $('.reg').validate(loginRules);
+
+            $('.inval').on('input', function (eventObject) {
+                if ($(this).attr("name") === "username" && eventObject.originalEvent.currentTarget) {
+                    var phone = $(this).val();
+                    if (phone.length === 11) {
+                        var phone_type = check_phone_type(phone);
+                        if (phone_type !== "联通") {
+                            $("input#password").rules("add", {
+                                required: true,
+                                messages: {required: '请输入服务密码'}
+                            });
+                        } else {
+                            $("input#password").rules("remove");
+                        }
+                    }
+                }
+
+                if ($('.reg').valid()) {
+                    start_btn_enable();
+                } else {
+                    start_btn_disable();
+                }
+            });
+
+            // 账户开始爬取
+            $(".login-btn1").click(function () {
+                if (!$('.reg').valid()) {
+                    return false;
+                }
+                start_crawl_user();
+            });
+
+            // 更换图片验证码
+            $("img#img_src").on("click", function () {
+                var ajax_data = {
+                    "username": username,
+                    "account_type": account_type
+                };
+                ajax_with_tip("{% url 'get_img_captcha' %}", ajax_data, function (data) {
+                    $("img#img_src").attr('src', 'data:image/jpeg;base64,' + data.img_data);
+                });
+            });
+
+            // 发送短信验证码
+            $("input#sms_btn").on("click", function () {
+                var ajax_data = {
+                    "account_type": account_type,
+                    "username": username,
+                    "sms_type": $("input#sms_type").val()   // 验证码类型
+                };
+                ajax_with_tip("{% url 'get_sms_captcha' %}", ajax_data, function (data) {
+                    $("input#is_click").val("true");  // 表示验证码按钮已经点击过了
+                    change_sms_btn();
+                });
+            })
+        });
+    </script>
+{% endblock %}

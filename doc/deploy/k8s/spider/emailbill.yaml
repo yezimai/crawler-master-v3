@@ -1,0 +1,41 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    component: bqjr-crawler-spider-emailbill
+  name: bqjr-crawler-spider-emailbill-deployment
+  namespace: bqjr-crawler
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: bqjr-crawler-spider-emailbill-app
+        component: bqjr-crawler-spider
+    spec:
+      volumes:
+      - name: spider-emailbill-code
+        hostPath:
+          path: "/data/code_source/crawler/crawler_bqjr/"
+      - name: spider-emailbill-log
+        hostPath:
+          path: "/data/logs/crawler/"
+      containers:
+      - image: docker.io/421084068/driver-python36
+        imagePullPolicy: IfNotPresent
+        command: ["python3","/work/crawler_bqjr/run_emailbill_spiders.py"]
+        volumeMounts:
+        - name: spider-emailbill-code
+          mountPath: "/work/crawler_bqjr/"
+        - name: spider-emailbill-log
+          mountPath: "/logs/"
+        name: crawler-spider-emailbill
+        env:
+        - name: LANG
+          value: "Zn_CN.UTF-8"
+        - name: LC_ALL
+          value: "en_US.utf8"
+        - name: PYTHONPATH
+          value: /work/crawler_bqjr
+        - name: PATH
+          value: "/usr/lib64/qt-3.3/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin/opt/google/chrome"

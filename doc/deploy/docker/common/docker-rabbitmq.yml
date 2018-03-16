@@ -1,0 +1,28 @@
+# 提供公共服务
+#
+
+version: "2"
+
+services:
+  rabbitmq:
+    image: docker.io/rabbitmq:latest
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    container_name: bqjr_rabbitmq
+    user: root
+    extra_hosts:
+      - "rabbit@bqjr_rabbitmq:127.0.0.1"
+      - "bqjr_rabbitmq:127.0.0.1"
+    hostname: bqjr_rabbitmq
+    environment:
+      - RABBITMQ_NODENAME=rabbit@bqjr_rabbitmq
+      - RABBITMQ_MNESIA_BASE=/var/lib/rabbitmq/mnesia
+      - RABBITMQ_MNESIA_DIR=/var/lib/rabbitmq/mnesia/rabbit@bqjr_rabbitmq
+      - RABBITMQ_LOGS=/var/lib/rabbitmq/rabbit@bqjr_rabbitmq.log
+      - RABBITMQ_SASL_LOGS=/var/lib/rabbitmq/rabbit@bqjr_rabbitmq-sasl.log
+      - RABBITMQ_PID_FILE=/var/lib/rabbitmq/mnesia/rabbit@bqjr_rabbitmq.pid
+    volumes:
+      - /data/rabbimq/:/var/lib/rabbitmq/
+    command: rabbitmq-server
+

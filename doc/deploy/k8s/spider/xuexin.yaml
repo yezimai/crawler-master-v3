@@ -1,0 +1,46 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    component: bqjr-crawler-spider-xuexin
+  name: bqjr-crawler-spider-xuexin-deployment
+  namespace: bqjr-crawler
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: bqjr-crawler-spider-xuexin-app
+        component: bqjr-crawler-spider
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: crawler100
+      volumes:
+      - name: spider-xuexin-code
+        hostPath:
+          path: "/data/code_source/crawler/crawler_bqjr/"
+      - name: spider-xuexin-log
+        hostPath:
+          path: "/data/logs/crawler/"
+      - name: spider-xuexin-img
+        hostPath:
+          path: "/data/pictures/xuexin/"
+      containers:
+      - image: docker.io/421084068/driver-python36
+        imagePullPolicy: IfNotPresent
+        command: ["python3","/work/crawler_bqjr/run_xuexin_spiders.py"]
+        volumeMounts:
+        - name: spider-xuexin-code
+          mountPath: "/work/crawler_bqjr/"
+        - name: spider-xuexin-log
+          mountPath: "/logs/"
+        - name: spider-xuexin-img
+          mountPath: "/data/image_data/"
+        name: crawler-spider-xuexin
+        env:
+        - name: LANG
+          value: "Zn_CN.UTF-8"
+        - name: LC_ALL
+          value: "en_US.utf8"
+        - name: PYTHONPATH
+          value: /work/crawler_bqjr

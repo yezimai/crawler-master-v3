@@ -1,0 +1,16 @@
+# 爬虫
+
+version: "2"
+
+services:
+  communications-spider:
+    image: driver-python36
+    user: root
+    volumes:
+      - /data/code_source/crawler/crawler_bqjr/:/work/crawler_bqjr/
+      - /data/logs/crawler/:/logs/
+    environment:
+      - LANG=Zn_CN.UTF-8
+      - LC_ALL=en_US.utf8
+    working_dir: /work/crawler_bqjr/
+    command: python3 ./run_communications_spiders.py

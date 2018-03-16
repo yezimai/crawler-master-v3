@@ -1,0 +1,61 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    component: bqjr-crawler-access
+  name: bqjr-crawler-access-deployment
+  namespace: bqjr-crawler
+spec:
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: bqjr-crawler-access-app
+        component: bqjr-crawler-access
+    spec:
+      volumes:
+      - name: access-dir
+        hostPath:
+          path: "/data/code_source_oauth/crawler/"
+      - name: access-log
+        hostPath:
+          path: "/data/logs/web/"
+      - name: access-tmp
+        hostPath:
+          path: "/data/tmp/"
+      containers:
+
+      - image: docker.io/421084068/driver-python36
+        imagePullPolicy: IfNotPresent
+        args: [/bin/sh, -c,
+            'uwsgi --ini /work/crawler_bqjr/web_service/nginx/uwsgi_access.ini']
+        name: crawler-uwsgi
+        env:
+         - name: PYTHONPATH
+           value: "/work/crawler_bqjr/"
+        volumeMounts:
+        - name: access-dir
+          mountPath: "/work/"
+        - name: access-log
+          mountPath: "/logs/"
+        - name: access-tmp
+          mountPath: "/tmp/"
+        ports:
+        - name: access
+          containerPort: 8001
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    component: bqjr-crawler-access
+  name: bqjr-crawler-access-service
+  namespace: bqjr-crawler
+spec:
+  ports:
+  - name: access
+    port: 8001
+  selector:
+    app: bqjr-crawler-access-app
+    component: bqjr-crawler-access
+  clusterIP: 10.109.49.46

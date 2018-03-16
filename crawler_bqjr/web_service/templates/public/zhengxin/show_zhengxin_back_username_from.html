@@ -1,0 +1,110 @@
+{% extends 'public/base.html' %}
+
+{% load static %}
+
+{% block title %}央行征信找回用户名{% endblock %}
+
+{% block content %}
+    <div class="con">
+        <form class="reg" id="reg_form" method="post" action="{% url 'back_chuck_username' %}">
+            <input type="hidden" name="org.apache.struts.taglib.html.TOKEN" value="{{ token }}">
+            <ul class="rcon">
+                <li class="rconli0"></li>
+                <li class="rconli">
+                    <span class="rconli_span">真实姓名</span>
+                    <input type="text" class="inval inval1" id="name" name="name" placeholder="请输入真实姓名"/>
+                    <span class="rconli_del">
+                        <img src="{% static 'public/images/reg_del.png' %}" class="rconli_del_img"/>
+                    </span>
+                </li>
+                <li class="rconli">
+                    <span class="rconli_span">证件类型</span>
+                    <span class="inval1">
+                        <select name="certType" id="certType" class="form-control" required>
+                            {% include "public/zhengxin/zhengxin_certtype_options.html" %}
+                        </select>
+                    </span>
+                </li>
+                <li class="rconli">
+                    <span class="rconli_span">证件号码</span>
+                    <input type="text" id="certNo" name="certNo" class="inval inval1" placeholder="请输入证件号码"/>
+                    <span class="rconli_del">
+                        <img src="{% static 'public/images/reg_del.png' %}" class="rconli_del_img"/>
+                    </span>
+                </li>
+{#                <li class="rconli">#}
+{#                    <span class="rconli_span">验 证 码</span>#}
+{#                    <input type="text" name="Yzm" class="inval inval2" placeholder="请输入验证码"/>#}
+{#                    <img src="{% static 'public/images/yzm.png' %}" class="yzm"/>#}
+{#                </li>#}
+            </ul>
+            <p class="forg_p">提示：提交成功后用户将发送至注册时预留的手机上，请确保手机畅通。</p>
+            <a class="btn2">下一步</a>
+            <button class="btn1" type="button">下一步</button>
+        </form>
+        <p class="rfoot">如果您没有办理过贷款或正在使用的信用卡，请直接<br/>登录中国人民行银征信中心网站查询。</p>
+    </div>
+{% endblock %}
+
+{% block script %}
+    <script type="text/javascript">
+        $(function () {
+            var insRules = {
+                rules: {
+                    name: {
+                        required: true
+                    },
+                    certNo: {
+                        required: true,
+                        idcard: true
+                    },
+                    Yzm: {
+                        required: true
+                    }
+                },
+
+                messages: {
+                    name: {
+                        required: '请输入姓名'
+                    },
+                    certNo: {
+                        required: '请输入证件号码'
+                    },
+                    Yzm: {
+                        required: '请输入验证码'
+                    }
+                },
+
+                onfocusout: function (element, event) {
+                    $('.error').html();
+                    $(element).valid();
+                }
+            };
+            $('.reg').validate(insRules);
+
+            $('.inval').on('input', function () {
+                if ($('.reg').valid()) {
+                    start_btn_enable();
+                } else {
+                    start_btn_disable();
+                }
+            });
+
+            $('.btn1').click(function () {
+                if (!$('.reg').valid()) {
+                    return false;
+                }
+
+                var ajax_data = {
+                    'name': document.getElementById('name').value,
+                    'certType': document.getElementById('certType').value,
+                    'certNo': document.getElementById('certNo').value
+                };
+                ajax_with_tip("{% url 'back_chuck_username' %}", ajax_data, function (data) {
+                    dialog.notice(get_success_dialog_msg(data.msg),
+                                   "{% url 'show_zhengxin_crawler_choose_form' %}");
+                });
+            });
+        });
+    </script>
+{% endblock %}

@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <title>查看验证码</title>
+</head>
+<body>
+{% load static %}
+<img src="{% static img_src %}">
+<form action="{% url 'verify_captcha' %}" method="post">
+    <input type="text" name="captcha" placeholder="验证码" autocomplete="off">
+    <input type="hidden" name="uid" value="{{ uid }}">
+    <input type="submit" value="提交">
+</form>
+</body>
+</html>

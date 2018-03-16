@@ -1,0 +1,99 @@
+{% load static %}
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+    <title>爬虫导航</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta name="description" content="爬虫导航页"/>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" type="text/css" media="screen"/>
+    <style type="text/css">
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: #fff url({% static 'img/bg.png' %}) no-repeat top left;
+        }
+
+        .title {
+            width: 550px;
+            height: 369px;
+            position: absolute;
+            top: 260px;
+            left: 150px;
+            background: transparent url({% static 'img/title.png' %}) no-repeat top left;
+        }
+
+        #content {
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+<div id="content">
+    <div class="navigation" id="nav">
+        <div class="item user">
+            <img src="{% static 'img/bg_user.png' %}" alt="" width="199" height="199" class="circle"/>
+            <a href="{% url 'show_xuexin_crawler_form' %}" target="_blank" class="icon"></a>
+            <h2><a href="{% url 'show_xuexin_crawler_form' %}" target="_blank">学信网</a></h2>
+        </div>
+        <div class="item home">
+            <img src="{% static 'img/bg_home.png' %}" alt="" width="199" height="199" class="circle"/>
+            <a href="{% url 'show_communications_crawler_form' %}" target="_blank" class="icon"></a>
+            <h2><a href="{% url 'show_communications_crawler_form' %}" target="_blank">运营商</a></h2>
+        </div>
+        <div class="item camera">
+            <img src="{% static 'img/bg_camera.png' %}" alt="" width="199" height="199" class="circle"/>
+            <a href="{% url 'show_zhengxin_crawler_choose_form' %}" target="_blank" class="icon"></a>
+            <h2><a href="{% url 'show_zhengxin_crawler_choose_form' %}" target="_blank">征信</a></h2>
+        </div>
+        <div class="item shop">
+            <img src="{% static 'img/bg_shop.png' %}" alt="" width="199" height="199" class="circle"/>
+            <a href="#" class="icon"></a>
+            <h2><a href="#">电商</a></h2>
+            <ul>
+                <li><a href="{% url 'show_ecommerce_jingdong_crawler_form' %}" target="_blank">京东</a></li>
+                <li><a href="{% url 'show_ecommerce_taobao_crawler_form' %}" target="_blank">淘宝</a></li>
+                <li><a href="{% url 'show_ecommerce_alipay_crawler_form' %}" target="_blank">支付宝</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+</body>
+<script type="text/javascript" src="//cdn.staticfile.org/jquery/1.10.2/jquery.min.js"></script>
+<script type="text/javascript" src="//cdn.bootcss.com/jquery-easing/1.4.1/jquery.easing.min.js"></script>
+<script type="text/javascript">
+    $(function () {
+        $('div#nav > div').hover(
+            function () {
+                var $this = $(this);
+                $this.find('img').stop().animate({
+                    'width': '68px',
+                    'height': '68px',
+                    'top': '-8px',
+                    'left': '-8px',
+                    'opacity': '1.0'
+                }, 500, 'easeOutBack', function () {
+                    $(this).parent().find('ul').fadeIn(700);
+                });
+
+                $this.find('a:first,h2').addClass('active');
+            },
+            function () {
+                var $this = $(this);
+                $this.find('ul').fadeOut(500);
+                $this.find('img').stop().animate({
+                    'width': '52px',
+                    'height': '52px',
+                    'top': '0px',
+                    'left': '0px',
+                    'opacity': '0.1'
+                }, 5000, 'easeOutBack');
+
+                $this.find('a:first,h2').removeClass('active');
+            }
+        );
+    });
+</script>
+</html>

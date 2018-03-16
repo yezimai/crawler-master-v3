@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>公积金城市联动</title>
+    <style>
+        .class_ul {
+            margin: auto 0;
+            list-style: none;
+            width: 200px;
+            height: 200px;
+        }
+
+        #ul_id li {
+            margin-left: auto;
+            padding-left: auto;
+        }
+
+        body {
+            font: 13px/26px "微软雅黑";
+            background: #666666;
+        }
+
+        div, ul, li {
+            margin: 0;
+            padding: 0;
+        }
+
+        a {
+            color: #000;
+            text-decoration: none;
+            line-height: 30px;
+            padding: 0 10px;
+        }
+
+        a:hover {
+            color: #C00;
+        }
+
+        /*.province{width:320px;height:42px;background:#C00;margin:80px auto;padding-left:10px;position:relative;}*/
+        /*.province strong{width:48px;height:42px;color:#FFF;line-height:42px;font-size:14px;font-weight:bold;display:block;float:left;}*/
+        /*.province span{width:200px;height:24px;line-height:24px;border:1px solid #999;background:#FFF url(images/province_sprites.png) no-repeat 189px -2px;display:block;float:left;margin-top:8px;padding-left:4px;cursor:pointer;}*/
+        .province ul {
+            width: 328px;
+            height: auto;
+            background: #FFF;
+            border: 1px solid #dfdfdf;
+            border-bottom: none;
+            clear: both;
+            display: none;
+        }
+
+        .province ul li {
+            height: 30px;
+            line-height: 30px;
+            border-bottom: 1px solid #dfdfdf;
+            padding-left: 10px;
+        }
+
+        .province ul li b {
+            font-weight: bold;
+        }
+
+        ul, li {
+            line-height: 24px;
+            height: auto;
+            word-break: break-all;
+            word-wrap: break-word
+        }
+
+        .show {
+            display: block;
+            word-break: break-all;
+            word-wrap: break-word
+        }
+    </style>
+</head>
+<body>
+<div>
+    <select id="selc_1">
+        <option>--请选择--</option>
+    </select>
+    <select id="selc_2">
+        <option>--请选择--</option>
+    </select>
+</div>
+<div class="province">
+    <input type="text" id="selectProvince" value="" onchange="query()">
+    <select id="select11"></select>
+    <ul class="show" id="allProvince" style="display: none;">
+    </ul>
+    <ul class="show" id="allProvince2" style="display: none;">
+    </ul>
+</div>
+</body>
+<script type="text/javascript" src="//cdn.staticfile.org/jquery/1.10.2/jquery.min.js"></script>
+<script type="text/javascript" src="{% static 'js/pinying.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/liandong.js' %}"></script>
+</html>

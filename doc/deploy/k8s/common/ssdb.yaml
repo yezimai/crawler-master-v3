@@ -1,0 +1,52 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    component: bqjr-crawler-ssdb
+  name: bqjr-crawler-ssdb-deployment
+  namespace: bqjr-crawler
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: bqjr-crawler-ssdb-app
+        component: bqjr-crawler-ssdb
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: crawler100
+      volumes:
+      - name: ssdb-data
+        hostPath:
+          path: "/data/ssdb/master/"
+      - name: ssdb-log
+        hostPath:
+          path: "/data/logs/ssdb/"
+      containers:
+      - image: docker.io/421084068/ssdb-server
+        imagePullPolicy: IfNotPresent
+        command: ["ssdb-server", "/ssdb/ssdb.conf","-s","restart"]
+        volumeMounts:
+        - name: ssdb-data
+          mountPath: "/ssdb/"
+        - name: ssdb-log
+          mountPath: "/logs/"
+        name: crawler-ssdb
+        ports:
+        - containerPort: 8888
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    component: bqjr-crawler-ssdb
+  name: bqjr-crawler-ssdb-service
+  namespace: bqjr-crawler
+spec:
+  ports:
+  - port: 8888
+  selector:
+    app: bqjr-crawler-ssdb-app
+    component: bqjr-crawler-ssdb
+  externalIPs: [172.16.8.30]

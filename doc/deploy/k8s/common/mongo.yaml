@@ -1,0 +1,52 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    component: bqjr-crawler-mongo
+  name: bqjr-crawler-mongo-deployment
+  namespace: bqjr-crawler
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: bqjr-crawler-mongo-app
+        component: bqjr-crawler-mongo
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: crawler100
+      volumes:
+      - name: mongo-data
+        hostPath:
+          path: "/data/mongodb/master/"
+      - name: mongo-log
+        hostPath:
+          path: "/data/logs/mongodb/"
+      containers:
+      - image: docker.io/421084068/mongo
+        imagePullPolicy: IfNotPresent
+        command: ["mongod", "-f", "/work/mongo-master.conf"]
+        volumeMounts:
+        - name: mongo-data
+          mountPath: "/work/"
+        - name: mongo-log
+          mountPath: "/logs/"
+        name: crawler-mongo
+        ports:
+        - containerPort: 27017
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    component: bqjr-crawler-mongo
+  name: bqjr-crawler-mongo-service
+  namespace: bqjr-crawler
+spec:
+  ports:
+  - port: 27017
+  selector:
+    app: bqjr-crawler-mongo-app
+    component: bqjr-crawler-mongo
+  externalIPs: [172.16.8.30]

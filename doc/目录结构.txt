@@ -1,0 +1,59 @@
+├─crawler_bqjr
+│  ├─browsers						：浏览器driver
+│  ├─captcha 						：验证码破解相关
+│  │  ├─geetest							：geetest验证码破解
+│  │  ├─ml 								：机器学习破解验证码（没用过）
+│  │  ├─pic_3click 						：163邮箱验证码测试
+│  │  ├─qqemail 						：QQ邮箱验证码破解（没用过）
+│  │  ├─tb_slider						：淘宝验证码破解（无效了）
+│  ├─datas 							：存放一些数据（如名字库）
+│  ├─ddxoft							：虚拟键盘相关（用于银行密码控件，只能在windows服务器上运行）
+│  ├─items 							：itmes定义
+│  ├─log 							：日志目录
+│  ├─pipelines 						：pipelines定义
+│  ├─spiders  						：爬虫代码目录
+│  │  ├─b2c_ecommerce_spiders 			：电商爬虫
+│  │  ├─bank_spiders					：银行爬虫（未上线，很多银行只能在windows服务器上运行）
+│  │  ├─communications_spiders			：通信运营商爬虫
+│  │  ├─company_spiders					：公司工商信息爬虫（没用了）
+│  │  ├─emailbill_spiders 				：邮箱信用卡账单爬虫（未上线）
+│  │  ├─housefund_spiders 				：公积金爬虫（没用了）
+│  │  ├─mobilebrand_spiders 			：手机品牌、配件爬虫
+│  │  ├─other_spiders 					：其它临时需求的爬虫
+│  │  ├─proxy_spiders					：代理爬虫
+│  │  ├─shebao_spiders 					：社保爬虫（没用了）
+│  │  ├─shixin_spiders					：失信、被执行人爬虫
+│  │  ├─userinfo_spiders				：学信网爬虫
+│  │  ├─wenshu_spiders 					：文书判决网爬虫（没用了）
+│  │  ├─zhengxin_spiders				：人行征信爬虫
+│  ├─tools 							：工具库（如加密等）
+├─data_storage						：数据存储相关
+├─proxy_api							：代理接口和代理可用性检查
+├─scripts							：脚本
+├─web_service						：web服务
+│  ├─account_spider_interface		：用户授权类爬虫相关
+│  ├─captchas_upload				：验证码手工验证（没用了）
+│  ├─log 							：web日志目录
+│  ├─nginx 							：nginx配置
+│  ├─rest_api 						：api相关（蜂巢手机型号库更新）
+│  ├─static							：静态文件目录
+│  │  ├─captcha 						：保存验证码的目录
+│  │  ├─css
+│  │  ├─fonts
+│  │  ├─img
+│  │  ├─js
+│  │  └─public 						：PCS项目的页面静态文件
+│  ├─templates						：页面文件目录
+│  │  ├─public							：PCS的页面文件目录
+│  │  │  ├─ecommerce 					：电商
+│  │  │  │  ├─alipay
+│  │  │  │  ├─jingdong
+│  │  │  │  └─taobao
+│  │  │  ├─email 						：邮件信用卡账单（未上线）
+│  │  │  ├─xuexin 						：学信
+│  │  │  └─zhengxin						：人行征信
+│  │  └─registration
+│  ├─web_service						：web服务配置目录
+│  │  └─
+│  └─
+└─

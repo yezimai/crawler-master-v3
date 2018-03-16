@@ -1,0 +1,303 @@
+{% extends 'public/base.html' %}
+
+{% load static %}
+
+{% block title %}邮箱账单认证{% endblock %}
+
+{% block content %}
+    <form class="reg">
+        <span class="iimg"></span>
+        <div class="con" id="main_div">
+            <div class="con" id="userLogin">
+                <ul class="rcon">
+                    <li class="rconli0"></li>
+                    <li class="rconli">
+                        <span class="rconli_span">账单邮箱</span>
+                        <input type="text" id="username" name="username" class="inval inval1" placeholder="信用卡所在账单邮箱"/>
+                        <span class="rconli_del">
+                            <img src="{% static 'public/images/reg_del.png' %}" class="rconli_del_img"/>
+                        </span>
+                    </li>
+                    <li class="rconli">
+                        <span class="rconli_span">邮箱密码</span>
+                        <input type="password" class="inval inval1" name="password" id="password" placeholder="邮箱登录密码"/>
+                        <span class="rconli_del">
+                            <img src="{% static 'public/images/reg_del.png' %}" class="rconli_del_img"/>
+                        </span>
+                    </li>
+                </ul>
+            </div>
+            <div class="con" id="captcha_code" style="display:none">
+                <ul class="rcon">
+                    <li class="rconli0"></li>
+                    <li class="rconli">
+                        <div id="img_captcha_div" class="m-form-item m-form-item-bor">
+                            <span class="rconli_span" id="codeType">验证码</span>
+                            <input type="text" name="captcha" id="captcha" class="inval inval2" placeholder="请输入验证码"/>
+                            <img class="yzm" id="click_captcha" src="" onclick='getMousePos(this.event)'>
+                            <img class="yzm" id="img_captcha" src="">
+                            <div align="center">
+                                <span id="img-text"></span>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <a class="btn2">开始认证</a>
+            <a class="btn1">开始认证</a>
+            <p class="log1p">
+                <a class="log1p_a2" href="{% url 'show_qq_qrcode_login' %}">QQ邮箱二维码登录</a>
+            </p>
+        </div>
+    </form>
+{% endblock %}
+
+{% block script %}
+    <script type="text/javascript">
+        function fnDelete() {
+            var elem = document.getElementById("gimg");
+            var childs = elem.childNodes;
+            for (var i = childs.length - 1; i >= 1; i--) {
+                elem.removeChild(childs.item(i));
+            }
+        }
+
+        function genClickImage(x, y) {
+            var d1 = document.getElementById("gimg");
+            var img = document.createElement("img");
+            img.src = "{% static 'img/click.png' %}";
+            <!--这个img像素22x22-->
+            var x1 = x - 11;
+            var y1 = y - 11;
+            img.setAttribute("style", "position:absolute;left:" + x1 + "px;top:" + y1 + "px;");
+
+            d1.appendChild(img);
+        }
+
+        function getMousePos(event) {
+            var e = event || window.event;
+            var scrollX = document.documentElement.scrollLeft || document.body.scrollLeft;
+            var scrollY = document.documentElement.scrollTop || document.body.scrollTop;
+            var x = e.pageX || e.clientX + scrollX;
+            var y = e.pageY || e.clientY + scrollY;
+
+            var ry = y - document.getElementById("captcha_code").offsetTop; // y相对坐标。减去verify-id的offsetTop
+            var rx = x - document.getElementById("click_captcha").offsetLeft; //x相对坐标。减去captcha-img的offsetLeft
+            genClickImage(x, y); //原坐标创建img
+            point6.push(rx);
+            point6.push(ry);
+            if (point6.length === 6) {
+                var ajax_data = {
+                    "account_type": "emailbill",
+                    "username": username,
+                    "img_uid": img_uid,
+                    "img_captcha": point6.join(",")
+                };
+                submit_captcha_code(ajax_data);
+            }
+        }
+
+        var point6 = [];
+
+        $(function () {
+            var offWidth = window.screen.width / 30; //这里用宽度/30表示1rem取得的px
+            document.getElementsByTagName("html")[0].style.fontSize = offWidth + 'px'; //把rem的值复制给顶级标签html的font-size
+        })
+    </script>
+    <script type="text/javascript">
+        var customer_id = "{{ customer_id }}";
+        var serial_no = "{{ serial_no }}";
+        var username = "";
+        var account_type = "emailbill";
+        var img_uid = "";
+
+        function start_crawl_user() {
+            username = $("input#username").val().trim();
+            var ajax_data = {
+                "customer_id": customer_id,
+                "serial_no": serial_no,
+                "account_type": account_type,
+                "username": username,
+                "password": $("input#password").val()
+            };
+            ajax_crawl_user(ajax_data);
+        }
+
+        function ask_crawling_status() {
+            var ajax_data = {
+                "account_type": account_type,
+                "username": username
+            };
+            ajax_crawling_status(ajax_data, function (data) {
+                var crawling_status = data.crawling_status;
+                if (crawling_status === "img_captcha" && data.img_desc !== undefined) {  //163点击验证码
+                    fnDelete();
+                    point6 = [];
+                    img_uid = data.img_uid;
+
+                    $('div#userLogin').hide();
+                    $("input#captcha").hide();
+                    $('#codeType').hide();
+                    $('.btn1').unbind("click").hide();
+
+                    $("img#click_captcha").attr("src", data.img_src).show();
+                    $("#img-text").text(data.img_desc);
+                    $("div#captcha_code").show();
+                } else if (crawling_status === "scan_qrcode") {  //二维码
+                    $('div#userLogin').hide();
+                    $("input#captcha").hide();
+                    $('#codeType').hide();
+
+                    $('img#img_captcha').attr("src", 'data:image/jpeg;base64,' + data.qrcode_pic).show();
+                    $("div#captcha_code").show();
+
+                    $('.btn2').text("扫描完成");
+                    $('.btn1').unbind("click").click(function () {
+                        var ajax_data = {
+                            "account_type": account_type,
+                            "username": data.username,
+                            "qrcode_uid": data.qrcode_uid,
+                            "qrcode_captcha": "ok"
+                        };
+                        submit_captcha_code(ajax_data);
+                    }).text("扫描完成");
+                } else if (crawling_status === "img_captcha") {  //图片验证码
+                    $("div#userLogin").hide();
+                    $("img#click_captcha").hide();
+
+                    $("input#captcha").val("");
+                    $('#codeType').text('图片验证码').show();
+                    $("div#captcha_code").show();
+
+                    $("img#img_captcha").attr("src", data.img_src).unbind('click').bind('click', function () {
+                        var email_name = data.username.split('@')[1].split('.')[0];
+                        var ajax_data = {
+                            "username": data.username,
+                            "account_type": account_type
+                        };
+                        if (email_name === 'sina') {
+                            ajax_with_tip("{% url 'sina_get_img_captcha' %}", ajax_data, function (data) {
+                                $("img#img_captcha").attr("src", 'data:image/jpeg;base64,' + datas.img_data);
+                            });
+                        } else if (email_name === 'sohu') {
+                            ajax_with_tip("{% url 'sohu_get_img_captcha' %}", ajax_data, function (data) {
+                                $("img#img_captcha").attr("src", 'data:image/jpeg;base64,' + datas.img_data);
+                            });
+                        }
+                    }).show();
+
+                    $('.btn2').text("提交");
+                    $(".btn1").unbind("click").bind("click", function () {
+                        var img_captcha = $("input#captcha").val().trim();
+                        if (img_captcha === "") {
+                            dialog.error("图片验证码不能为空");
+                            return;
+                        }
+
+                        var ajax_data = {
+                            "account_type": account_type,
+                            "username": data.username,
+                            "img_uid": data.img_uid,
+                            "img_captcha": img_captcha
+                        };
+                        submit_captcha_code(ajax_data);
+                    }).text("提交");
+                } else if (crawling_status === "sms_captcha") {  //短信验证码
+                    $("div#userLogin").hide();
+                    $("img#click_captcha").hide();
+                    $("img#img_captcha").hide();
+
+                    $("input#captcha").val("");
+                    $('#codeType').text('短信验证码').show();
+                    $("div#captcha_code").show();
+
+                    $('.btn2').text("提交");
+                    $(".btn1").unbind("click").bind("click", function () {
+                        var sms_captcha = $("input#captcha").val().trim();
+                        if (sms_captcha === "") {
+                            dialog.error("短信验证码不能为空");
+                            return;
+                        }
+
+                        var ajax_data = {
+                            "account_type": account_type,
+                            "username": data.username,
+                            "sms_uid": data.sms_uid,
+                            "sms_captcha": sms_captcha
+                        };
+                        submit_captcha_code(ajax_data);
+                    }).text("提交");
+
+                } else if (crawling_status === "extra_captcha") {
+                    $("div#userLogin").hide();
+                    $("img#click_captcha").hide();
+                    $("img#img_captcha").hide();
+
+                    $("input#captcha").val("").attr("placeholder", "请输入独立密码").show();
+                    $('#codeType').text('独立密码').show();
+                    $("div#captcha_code").show();
+
+                    $('.btn2').text("提交");
+                    $(".btn1").unbind("click").bind("click", function () {
+                        var sms_captcha = $("input#captcha").val().trim();
+                        if (sms_captcha === "") {
+                            dialog.error("独立密码不能为空");
+                            return;
+                        }
+
+                        var ajax_data = {
+                            "account_type": account_type,
+                            "username": data.username,
+                            "extra_uid": data.extra_uid,
+                            "extra_captcha": sms_captcha
+                        };
+                        submit_captcha_code(ajax_data);
+                    }).text("提交");
+                }
+            });
+        }
+
+        $(function () {
+            var insRules = {
+                rules: {
+                    username: {
+                        required: true
+                    },
+                    password: {
+                        required: true
+                    }
+                },
+
+                messages: {
+                    username: {
+                        required: "请输入用户名"
+                    },
+                    password: {
+                        required: '请输入登录密码'
+                    }
+                },
+
+                onfocusout: function (element, event) {
+                    $('.error').html();
+                    $(element).valid();
+                }
+            };
+            $('.reg').validate(insRules);
+
+            $('.inval').on('input', function () {
+                if ($('.reg').valid()) {
+                    start_btn_enable();
+                } else {
+                    start_btn_disable();
+                }
+            });
+
+            $('.btn1').click(function () {
+                if (!$('.reg').valid()) {
+                    return false;
+                }
+                start_crawl_user();
+            });
+        });
+    </script>
+{% endblock %}

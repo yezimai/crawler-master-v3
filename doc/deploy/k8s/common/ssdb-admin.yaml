@@ -1,0 +1,48 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    component: bqjr-crawler-ssdbadmin
+  name: bqjr-crawler-ssdbadmin-deployment
+  namespace: bqjr-crawler
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: bqjr-crawler-ssdbadmin-app
+        component: bqjr-crawler-ssdbadmin
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: crawler101
+      volumes:
+      - name: ssdb-admin-log
+        hostPath:
+          path: "/data/logs/ssdb/"
+      containers:
+      - image: docker.io/421084068/phpssdbadmin
+        imagePullPolicy: IfNotPresent
+        args: [/bin/sh, -c,
+            'nginx && php-fpm']
+        volumeMounts:
+        - name: ssdb-admin-log
+          mountPath: "/logs/"
+        name: crawler-ssdbadmin
+        ports:
+        - containerPort: 9111
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    component: bqjr-crawler-ssdbadmin
+  name: bqjr-crawler-ssdbadmin-service
+  namespace: bqjr-crawler
+spec:
+  ports:
+  - port: 9111
+  selector:
+    app: bqjr-crawler-ssdbadmin-app
+    component: bqjr-crawler-ssdbadmin
+  externalIPs: [172.16.8.30]

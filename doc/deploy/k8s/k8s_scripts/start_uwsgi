@@ -1,0 +1,2 @@
+echo "nameserver 10.25.1.6" >> /etc/resolv.conf
+uwsgi --ini /work/crawler_bqjr/web_service/nginx/uwsgi.ini

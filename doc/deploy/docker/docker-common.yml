@@ -1,0 +1,82 @@
+# 提供公共服务
+#
+
+version: "2"
+
+services:
+  mongo-master:
+    image: docker.io/mongo
+    networks:
+      - my-spider
+      - web-service
+    ports:
+      - "27017:27017"
+    volumes:
+      - /data/mongodb/master/:/work/
+      - /data/logs/mongodb/:/logs/
+    command: mongod -f /work/mongo-master.conf
+    user: root
+
+
+#  mongo-slave:
+#    image: docker.io/mongo
+#    networks:
+#      - my-spider
+#      - web-service
+#    ports:
+#      - "27016:27016"
+#    volumes:
+#      - /data/mongodb/slave/:/work/
+#      - /data/logs/mongodb/:/logs/
+#    command: mongod -f /work/mongo-slave.conf
+#    user: root
+
+  ssdb-master:
+    image: ssdb-server
+    networks:
+      - my-spider
+      - web-service
+    ports:
+      - "8888:8888"
+    volumes:
+      - /data/ssdb/master/:/ssdb/
+    command: ssdb-server /ssdb/ssdb.conf -s restart
+    user: root
+
+  ssdb-admin:
+    image: phpssdbadmin
+    ports:
+      - "9111:9111"
+    volumes:
+      - /data/logs/ssdb/:/logs/
+    command: sh -c 'nginx && php-fpm'
+
+  mysql-master:
+    image: docker.io/mysql
+    networks:
+      - my-spider
+      - web-service
+    volumes:
+      - /data/mysql/:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=bqjr2017
+        MYSQL_USER=test
+        MYSQL_PASSWORD=123456
+        MYSQL_DATABASE=captchas
+    command: mysqld
+    user: root
+#  ssdb-slave:
+#    image: ssdb
+#    networks:
+#      - my-spider
+#      - web-service
+#    ports:
+#      - "8889:8889"
+#    volumes:
+#      - /data/ssdb/slave/:/ssdb/
+#    command: ssdb /ssdb/ssdb_slave.conf
+networks:
+  my-spider:
+  web-service:

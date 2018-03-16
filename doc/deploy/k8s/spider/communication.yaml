@@ -1,0 +1,39 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    component: bqjr-crawler-spider-communication
+  name: bqjr-crawler-spider-communication-deployment
+  namespace: bqjr-crawler
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: bqjr-crawler-spider-communication-app
+        component: bqjr-crawler-spider
+    spec:
+      volumes:
+      - name: spider-communication-code
+        hostPath:
+          path: "/data/code_source/crawler/crawler_bqjr/"
+      - name: spider-communication-log
+        hostPath:
+          path: "/data/logs/crawler/"
+      containers:
+      - image: docker.io/421084068/driver-python36
+        imagePullPolicy: IfNotPresent
+        command: ["python3","/work/crawler_bqjr/run_communications_spiders.py"]
+        volumeMounts:
+        - name: spider-communication-code
+          mountPath: "/work/crawler_bqjr/"
+        - name: spider-communication-log
+          mountPath: "/logs/"
+        name: crawler-spider-communication
+        env:
+        - name: LANG
+          value: "Zn_CN.UTF-8"
+        - name: LC_ALL
+          value: "en_US.utf8"
+        - name: PYTHONPATH
+          value: /work/crawler_bqjr

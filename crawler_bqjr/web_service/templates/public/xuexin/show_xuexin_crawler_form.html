@@ -1,0 +1,185 @@
+{% extends 'public/base.html' %}
+
+{% load static %}
+
+{% block title %}学信网认证{% endblock %}
+
+{% block css %}
+    <style type="text/css">
+        .reg_btn {
+            display: block;
+            cursor: pointer;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="con">
+        <img src="{% static 'public/images/edu_img01.png' %}" class="log1img"/>
+        <form class="reg">
+            <div id="account-id">
+                <ul class="rcon">
+                    <li class="rconli0"></li>
+                    <li class="rconli">
+                        <span class="rconli_span">用户名</span>
+                        <input type="text" name="username" id="username" class="inval inval1"
+                               placeholder="手机号/身份证号/邮箱"/>
+                        <span class="rconli_del">
+                            <img src="{% static 'public/images/reg_del.png' %}" class="rconli_del_img"/>
+                        </span>
+                    </li>
+                    <li class="rconli">
+                        <span class="rconli_span">密码</span>
+                        <input type="password" class="inval inval1" name="password" id="password"
+                               placeholder="请输入登录密码"/>
+                        <span class="rconli_del">
+                            <img src="{% static 'public/images/reg_del.png' %}" class="rconli_del_img"/>
+                        </span>
+                    </li>
+                </ul>
+            </div>
+            <div id="verify-id" style="display:none">
+                <li class="rconli img_change">
+                    <div align="center">
+                        <img id="captcha-img" src="" title="看不清换一张" onclick='change_capcha()'>
+                    </div>
+                </li>
+                <li class="rconli">
+                    <span id="verify-text" class="rconli_span">图片验证码</span>
+                    <input type="text" id="captcha-id" name="PicYzm" placeholder="请输入验证码"/>
+                </li>
+            </div>
+        </form>
+        <a class="btn2">查询</a>
+        <a class="btn1 login_btn">查询</a>
+        <a class="btn3 btn12 reg_btn" href="{% url 'show_xuexin_reg_form' %}">注册</a>
+        <p class="log1p">
+            <a class="log1p_a1" href="{% url 'show_xuexin_find_username_form' %}">忘记用户名</a>
+            <a class="log1p_a2" href="{% url 'show_xuexin_find_password_form_step1' %}">忘记密码</a>
+        </p>
+        <p class="rfoot2">查询信息来自学信网,2001年之前的所有学历暂不提供查询服务</p>
+    </div>
+{% endblock %}
+
+{% block script %}
+    <script type="text/javascript">
+        var customer_id = "{{ customer_id }}";
+        var serial_no = "{{ serial_no }}";
+        var username = "";
+        var account_type = "xuexin";
+
+        function start_crawl_user() {
+            username = $("input#username").val().trim();
+            var ajax_data = {
+                "customer_id": customer_id,
+                "serial_no": serial_no,
+                "account_type": account_type,
+                "username": username,
+                "password": $("input#password").val()
+            };
+            ajax_crawl_user(ajax_data);
+        }
+
+        function ask_crawling_status() {
+            var ajax_data = {
+                "account_type": account_type,
+                "username": username
+            };
+            ajax_crawling_status(ajax_data, function (data) {
+                var crawling_status = data.crawling_status;
+                if (crawling_status === "img_captcha") {  //图片验证码
+                    $('.reg_btn').hide();
+                    $('div#account-id').hide();
+
+                    $("img#captcha-img").attr("src", data.img_src).show();
+                    $("input#captcha-id").val("").attr("placeholder", "请输入图片验证码");
+                    $('#verify-text').text('图片验证码');
+                    $("div#verify-id").show();
+
+                    $('.login_btn').unbind("click").click(function () {
+                        var img_captcha = $("input#captcha-id").val().trim();
+                        if (img_captcha === "") {
+                            dialog.error("图片验证码不能为空");
+                            return;
+                        }
+
+                        var ajax_data = {
+                            "account_type": account_type,
+                            "username": data.username,
+                            "img_uid": data.img_uid,
+                            "img_captcha": img_captcha
+                        };
+                        submit_captcha_code(ajax_data);
+                    }).text('提交');
+                } else if (crawling_status === "sms_captcha") {  //短信验证码
+                    $('.reg_btn').hide();
+                    $("div#account-id").hide();
+                    $("img#captcha-img").hide();
+
+                    $("input#captcha-id").val("").attr("name", "SmsYzm").attr("placeholder", "请输入短信动态码");
+                    $('#verify-text').text('短信验证码');
+                    $("div#verify-id").show();
+
+                    $('.login_btn').unbind("click").click(function () {
+                        var sms_captcha = $("input#captcha-id").val().trim();
+                        if (sms_captcha === "") {
+                            dialog.error("短信验证码不能为空");
+                            return;
+                        }
+
+                        var ajax_data = {
+                            "account_type": account_type,
+                            "username": data.username,
+                            "sms_uid": data.sms_uid,
+                            "sms_captcha": sms_captcha
+                        };
+                        submit_captcha_code(ajax_data);
+                    }).text('提交');
+                }
+            });
+        }
+
+        $(function () {
+            var insRules = {
+                rules: {
+                    username: {
+                        required: true
+                    },
+                    password: {
+                        required: true
+                    }
+                },
+
+                messages: {
+                    username: {
+                        required: "请输入用户名"
+                    },
+                    password: {
+                        required: '请输入登录密码'
+                    }
+                },
+
+                onfocusout: function (element, event) {
+                    $('.error').html();
+                    $(element).valid();
+                }
+            };
+            $('.reg').validate(insRules);
+
+            $('.inval').on('input', function () {
+                if ($('.reg').valid()) {
+                    start_btn_enable();
+                } else {
+                    start_btn_disable();
+                }
+            });
+
+            $('.login_btn').click(function () {
+                if (!$('.reg').valid()) {
+                    return false;
+                }
+                start_crawl_user();
+            });
+        });
+    </script>
+{% endblock %}

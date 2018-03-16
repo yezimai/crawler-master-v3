@@ -1,0 +1,16 @@
+# 提供公共服务
+#
+
+version: "2"
+
+services:
+  ssdb-master:
+    image: ssdb-server
+    ports:
+      - "8888:8888"
+    volumes:
+      - /data/ssdb/master/:/ssdb/
+      - /data/logs/ssdb/:/logs/
+    command: ssdb-server /ssdb/ssdb.conf -s restart
+    user: root
+

@@ -1,0 +1,174 @@
+{% extends 'public/base.html' %}
+
+{% load static %}
+
+{% block title %}邮箱账单认证{% endblock %}
+
+{% block css %}
+    <style type="text/css">
+        .qlogin .qr_1 .qr_invalid_tips {
+            color: #FFF;
+            cursor: pointer;
+            left: 12px;
+            line-height: 20px;
+            position: absolute;
+            text-align: center;
+            top: 30px;
+            width: 85px;
+            z-index: 1000;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div id="dialog" style="display:none">
+        <span class="iimg"></span>
+        <div id="captcha_code">
+            <span class="span_size" id="codeType">独立密码</span>
+            <input type="text" placeholder="请输入独立密码!" id="captcha" class="email">
+            <div align="center" id="qr">
+                <img id="img_captcha" src="">
+                <div align="center">
+                    <span id="img-text">使用手机QQ扫描二维码</span>
+                </div>
+            </div>
+        </div>
+        <div class="padd" align="center">
+            <button type="button" id="captcha_submit" onclick="ask_qr_status()">确认提交</button>
+        </div>
+    </div>
+{% endblock %}
+
+{% block script %}
+    <script type="text/javascript">
+        var customer_id = "{{ customer_id }}";
+        var serial_no = "{{ serial_no }}";
+        var username = "";
+        var account_type = "emailbill";
+        var cookies = {};
+        var appid = "";
+        var daid = "";
+        var stop = 0;
+
+        var refresh_qr = setInterval(function () {
+            if (stop === 0) {
+                ask_qr_status();
+            }
+        }, 4000);
+
+        function get_qr_code() {
+            $.ajax({
+                url: "{% url 'qq_get_qrcode' %}",
+                type: 'POST',
+                dataType: 'json',
+                timeout: 30000,
+                traditional: true,
+                cache: false,
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    get_qr_code();
+                    console.log("获取二维码失败");
+                },
+                success: function (data) {
+                    if (data.status === "ok") {
+                        var the_data = data.data;
+                        cookies = JSON.stringify(the_data.cookies);
+                        appid = the_data.appid;
+                        daid = the_data.daid;
+
+                        $('input#captcha').hide();
+                        $('#codeType').hide();
+
+                        $('#img_captcha').attr("src", 'data:image/jpeg;base64,' + the_data.pic).show();
+                        $('div#captcha_code').show();
+                        $("button#captcha_submit").hide();
+                        $('div#dialog').show();
+                    } else {
+                        get_qr_code();
+                        console.log("获取二维码失败：" + data.msg);
+                    }
+                }
+            });
+        }
+
+        function ask_qr_status() {
+            $.ajax({
+                url: "{% url 'qq_get_qrcode_status' %}",
+                data: {
+                    "cookies": cookies,
+                    "appid": appid,
+                    "daid": daid
+                },
+                type: 'POST',
+                dataType: 'json',
+                timeout: 30000,
+                traditional: true,
+                cache: false,
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    ask_qr_status();
+                    console.log("刷新失败");
+                },
+                success: function (data) {
+                    var the_data = data.data;
+                    if (the_data.qr_code === "65") {
+                        get_qr_code();
+                    } else if (the_data.qr_code === "0") {
+                        var regs = /uin=([0-9]+)/.exec(the_data.qr_url);
+                        var name = "";
+                        if (regs.length >= 2) {
+                            name = regs[1]
+                        } else {
+                            name = the_data.qr_nick_name
+                        }
+
+                        start_crawl_user(the_data.qr_url, name);
+                        stop = 1;
+                        clearInterval(refresh_qr);
+                    }
+                }
+            });
+        }
+
+        function start_crawl_user(qr_result_url, qr_nick_name) {
+            username = qr_nick_name + "@qq.com";
+            var ajax_data = {
+                "customer_id": customer_id,
+                "serial_no": serial_no,
+                "account_type": "emailbill",
+                "username": username,
+                "password": qr_result_url + "|" + cookies
+            };
+            ajax_crawl_user(ajax_data);
+        }
+
+        function ask_crawling_status() {
+            var ajax_data = {
+                "account_type": account_type,
+                "username": username
+            };
+            ajax_crawling_status(ajax_data, function (data) {
+                var crawling_status = data.crawling_status;
+                if (crawling_status === "extra_captcha") {
+                    $("div#qr").hide();
+
+                    $("input#captcha").val("").attr("placeholder", "请输入独立密码").show();
+                    $('#codeType').show();
+                    $("div#captcha_code").show();
+
+                    $("button#captcha_submit").unbind("click").bind("click", function () {
+                        var ajax_data = {
+                            "account_type": "emailbill",
+                            "username": data.username,
+                            "extra_uid": data.extra_uid,
+                            "extra_captcha": $("input#captcha").val().trim()
+                        };
+                        submit_captcha_code(ajax_data);
+                    }).show();
+                }
+            });
+        }
+
+        $(function () {
+            get_qr_code();
+        });
+    </script>
+{% endblock %}

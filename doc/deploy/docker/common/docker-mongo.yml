@@ -1,0 +1,16 @@
+# 提供公共服务
+#
+
+version: "2"
+
+services:
+  mongo-master:
+    image: docker.io/mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - /data/mongodb/master/:/work/
+      - /data/logs/mongodb/:/logs/
+    command: mongod -f /work/mongo-master.conf
+    user: root
+

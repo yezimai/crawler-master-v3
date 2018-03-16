@@ -1,0 +1,159 @@
+{% extends 'public/base.html' %}
+
+{% load static %}
+
+{% block title %}央行征信找回密码{% endblock %}
+
+{% block content %}
+    <div class="con">
+        <div class="rhead">
+            <ul class="rheadul">
+                <li class="retli rheadli1">
+                    <span class="rheadli_span1">
+                        <span class="rheadli_span21">
+                            <img src="{% static 'public/images/reg_img01.png' %}" class="rheadli_img1"/>
+                        </span>
+                    </span>
+                    输入用户名
+                </li>
+                <li class="retli rheadli2">
+                    <span class="rheadli_span1">
+                        <span class="rheadli_span22">
+                            <img src="{% static 'public/images/reg_img04.png' %}" class="rheadli_img2"/>
+                        </span>
+                    </span>
+                    设置新密码
+                </li>
+                <li class="retli rheadli2">
+                    <span class="rheadli_span1">
+                        <span class="rheadli_span22">
+                            <img src="{% static 'public/images/reg_img05.png' %}" class="rheadli_img3"/>
+                        </span>
+                    </span>
+                    问题校验
+                </li>
+                <li class="retli rheadli2">
+                    <span class="rheadli_span1">
+                        <span class="rheadli_span22">
+                            <img src="{% static 'public/images/reg_img06.png' %}" class="rheadli_img3"/>
+                        </span>
+                    </span>
+                    设置成功
+                </li>
+            </ul>
+            <ul class="rheadulbg">
+                <li class="retbg_li"></li>
+                <li class="retbg_li rheadulbg_li1"></li>
+                <li class="retbg_li rheadulbg_li1"></li>
+                <li class="retbg_li rheadulbg_li2"></li>
+                <li class="retbg_li rheadulbg_li2"></li>
+                <li class="retbg_li rheadulbg_li2"></li>
+                <li class="retbg_li rheadulbg_li2"></li>
+                <li class="retbg_li"></li>
+            </ul>
+        </div>
+        <form class="reg" method="post" action="{% url 'back_chuck_passwd' %}">
+            <ul class="rcon">
+                <li class="rconli">
+                    <span class="rconli_span">用 户 名</span>
+                    <input type="text" id="loginName" name="loginName"
+                           class="inval inval1" placeholder="请输入用户名"/>
+                    <span class="rconli_del">
+                        <img src="{% static 'public/images/reg_del.png' %}" class="rconli_del_img"/>
+                    </span>
+                </li>
+                <li class="rconli">
+                    <span class="rconli_span">真实姓名</span>
+                    <input type="text" class="inval inval1" id="name" name="name" placeholder="请输入真实姓名"/>
+                    <span class="rconli_del">
+                        <img src="{% static 'public/images/reg_del.png' %}" class="rconli_del_img"/>
+                    </span>
+                </li>
+                <li class="rconli">
+                    <span class="rconli_span">证件类型</span>
+                    <span class="inval1">
+                        <select name="certType" id="certType" class="form-control" required>
+                            {% include "public/zhengxin/zhengxin_certtype_options.html" %}
+                        </select>
+                    </span>
+                </li>
+                <li class="rconli">
+                    <span class="rconli_span">证件号码</span>
+                    <input type="text" id="certNo" name="certNo" class="inval inval1" placeholder="请输入证件号码"/>
+                    <span class="rconli_del">
+                        <img src="{% static 'public/images/reg_del.png' %}" class="rconli_del_img"/>
+                    </span>
+                </li>
+{#                <li class="rconli">#}
+{#                    <span class="rconli_span">验 证 码</span>#}
+{#                    <input type="text" name="Yzm" class="inval inval2" placeholder="请输入验证码"/>#}
+{#                    <img src="{% static 'public/images/yzm.png' %}" class="yzm"/>#}
+{#                </li>#}
+                <label id="error_list" generated="true" class="error">{{ msg }}</label>
+            </ul>
+            <a class="btn2">下一步</a>
+            <button class="btn1" type="submit">下一步</button>
+        </form>
+        <p class="rfoot">如果您没有办理过贷款或正在使用的信用卡，请直接<br/>登录中国人民行银征信中心网站查询。</p>
+    </div>
+{% endblock %}
+
+{% block script %}
+    <script type="text/javascript">
+        $(function () {
+            var insRules = {
+                rules: {
+                    loginName: {
+                        required: true
+                    },
+                    name: {
+                        required: true
+                    },
+                    certNo: {
+                        required: true,
+                        idcard: true
+                    },
+                    Yzm: {
+                        required: true
+                    }
+                },
+
+                messages: {
+                    loginName: {
+                        required: '请输入用户名'
+                    },
+                    name: {
+                        required: '请输入姓名'
+                    },
+                    certNo: {
+                        required: '请输入证件号码'
+                    },
+                    Yzm: {
+                        required: '请输入验证码'
+                    }
+                },
+
+                onfocusout: function (element, event) {
+                    $('.error').html();
+                    $(element).valid();
+                    $('#error_list').hide()
+                }
+            };
+            $('.reg').validate(insRules);
+
+            $('.inval').on('input', function () {
+                if ($('.reg').valid()) {
+                    start_btn_enable();
+                } else {
+                    start_btn_disable();
+                }
+            });
+
+            $('.btn1').click(function () {
+                if (!$('.reg').valid()) {
+                    return false;
+                }
+            });
+        });
+    </script>
+{% endblock %}

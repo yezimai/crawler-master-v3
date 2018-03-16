@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <title>公积金登录</title>
+    {% load static %}
+    <link rel="stylesheet" href="//cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+    <script type="text/javascript" src="//cdn.staticfile.org/jquery/1.10.2/jquery.min.js"></script>
+    <script type="text/javascript" src="{% static 'js/zhongwen_sort.js' %}"></script>
+    <style type="text/css">
+        .btnhqjym {
+            display: block;
+            width: 100px;
+            height: 30px;
+            margin-top: 2px;
+            border: 1px solid #AAA;
+            border-radius: 4px;
+            background: #F6F6F6;
+            font-size: 12px;
+            font-weight: 700;
+            text-align: center;
+            color: #333;
+            cursor: pointer;
+            float: right;
+        }
+
+        .regiptbox {
+            width: 120px !important;
+            float: left;
+        }
+
+        .must_item {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+
+<div class="robot-main">
+    <div class="m-dialog robot-dialog">
+        <div class="m-dialog-hd" style="margin-top: 200px;">
+            <div class="m-dialog-title">社保公积金查询登录</div>
+        </div>
+        <span style="color:red">{{ msg }}</span>
+        <div class="m-dialog-md">
+            {% block cotent %}
+            {% endblock %}
+        </div>
+    </div>
+</div>
+<div class="robot-tip" id="bodyTip">
+    <div class="robot-tip-main" id="bodyTipmain"></div>
+</div>
+</body>
+</html>

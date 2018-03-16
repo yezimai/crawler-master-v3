@@ -1,0 +1,39 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    component: bqjr-crawler-spider-zhengxin
+  name: bqjr-crawler-spider-zhengxin-deployment
+  namespace: bqjr-crawler
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: bqjr-crawler-spider-zhengxin-app
+        component: bqjr-crawler-spider
+    spec:
+      volumes:
+      - name: spider-zhengxin-code
+        hostPath:
+          path: "/data/code_source/crawler/crawler_bqjr/"
+      - name: spider-zhengxin-log
+        hostPath:
+          path: "/data/logs/crawler/"
+      containers:
+      - image: docker.io/421084068/driver-python36
+        imagePullPolicy: IfNotPresent
+        command: ["python3","/work/crawler_bqjr/run_zhengxin_spiders.py"]
+        volumeMounts:
+        - name: spider-zhengxin-code
+          mountPath: "/work/crawler_bqjr/"
+        - name: spider-zhengxin-log
+          mountPath: "/logs/"
+        name: crawler-spider-zhengxin
+        env:
+        - name: LANG
+          value: "Zn_CN.UTF-8"
+        - name: LC_ALL
+          value: "en_US.utf8"
+        - name: PYTHONPATH
+          value: /work/crawler_bqjr

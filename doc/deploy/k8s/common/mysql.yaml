@@ -1,0 +1,56 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    component: bqjr-crawler-mysql
+  name: bqjr-crawler-mysql-deployment
+  namespace: bqjr-crawler
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: bqjr-crawler-mysql-app
+        component: bqjr-crawler-mysql
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: crawler101
+      volumes:
+      - name: mysql-data
+        hostPath:
+          path: "/data/mysql/"
+      containers:
+      - image: docker.io/421084068/mysql
+        imagePullPolicy: IfNotPresent
+        args: [/bin/sh, -c,
+            'docker-entrypoint.sh mysqld && mysqld']
+        volumeMounts:
+        - name: mysql-data
+          mountPath: "/var/lib/mysql"
+        name: crawler-mysql
+        ports:
+        - containerPort: 3306
+        env:
+         - name: MYSQL_ROOT_PASSWORD
+           value: "bqjr@!2017"
+         - name: MYSQL_USER
+           value: "user_bqjr_mysql"
+         - name: MYSQL_PASSWORD
+           value: "mysql@b1jr!2017"
+         - name: MYSQL_DATABASE
+           value: "captchas"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    component: bqjr-crawler-mysql
+  name: bqjr-crawler-mysql-service
+  namespace: bqjr-crawler
+spec:
+  ports:
+  - port: 3306
+  selector:
+    app: bqjr-crawler-mysql-app
+    component: bqjr-crawler-mysql
+  externalIPs: [172.16.8.30]
